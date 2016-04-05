@@ -205,9 +205,18 @@ public class Compiler {
     //              | 'r' '(' ')' | 's' '(' ')' | 't' '(' ')'
     private Factor factor() {
       Factor factor = null;
-      if (token == 'r' && ){
-        nextToken
+      if (token == 'r' || token == 's' || token == 't'){
+        nextToken();
+        if (token == '(') {
+          nextToken();
+          if (token == ')') {
+            nextToken();
+          } else error();
+        } else error();
+      } else {
+        
       }
+
       return factor;
     }
 
