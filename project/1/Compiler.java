@@ -1,6 +1,8 @@
-/*
-UFSCar - Universidade Federal de São Carlos - Campus Sorocaba
-Compiladores - 2016/01
+/**
+* UFSCar - Universidade Federal de São Carlos - Campus Sorocaba
+* 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
+* @author  André Bonfatti, 408182
+* @author  Thales Chagas,  408557
 
 =================================
 Projeto de Implementação - Fase 1
@@ -74,47 +76,71 @@ public class Compiler {
           if (token = ')') {
             nextToken();
             decl = new Decl(stmtBlock());
-          }
-        }
-      }
-    }
+          } else
+            error();
+        } else
+          error();
+      } else
+        error();
+    } else
+      error();
+
     return decl;
   }
 
   // StmtBlock ::= '{' { VariableDecl } { Stmt } '}'
   private StmtBlock stmtBlock() {
-    ArrayList<VariableDecl> retorno = new ArrayList<VariableDecl>();
-    while(token == 'i' || token == 'd' || token == 'c'){
+    StmtBlock stmtBlock = new StmtBlock();
 
+    if (token == '{') {
+      nextToken();
+    } else
+      error();
+
+    while(token == 'i' || token == 'd' || token == 'c'){ // { VariableDecl }
+      stmtBlock.addVariableDecl(variableDecl());
     }
-    ArrayList<Stmt> varDec = variableDecl();
+    while(token != '}') { // { Stmt }
+      stmtBlock.addStmt(stmt());
+    }
 
+    return stmtBlock;
   }
 
   // VariableDecl ::= Variable ';'
-  private ArrayList<Variable> variableDecl() {
+  private VariableDecl variableDecl() {
+    variableDecl vd = new VariableDecl(variable());
+    if (token == ';') {
+      nextToken();
+    } else
+      error();
 
-    return varList;
+    return vd;
   }
 
   // Variable ::= Type Ident
   private Variable variable() {
-    type();
-    ident();
+    Variable variable = new Variable();
+    variable.setType(type());
+    variable.setIdent(ident());
+
+    return variable;
   }
 
   // Type ::= StdType | ArrayType
   private Type type() {
     if (token == 'i' || token == 'd' || token == 'c') {
       nextToken();
-      else error();
+      else
+        error();
     }
 
     // StdType ::= 'i' | 'd' | 'c'
     private StdType stdType() {
       if (token == 'i' || token == 'd' || token == 'c') {
         nextToken();
-      } else error();
+      } else
+        error();
     }
 
     // ArrayType ::= StdType '[' ']'
@@ -124,18 +150,69 @@ public class Compiler {
         nextToken();
         if (token == ']') {
           nextToken();
-        } else error();
-      } else error();
+        } else
+          error();
+      } else
+        error();
     }
 
     // Stmt ::= Expr ';' | IfStmt | WhileStmt | BreakStmt | PrintStmt
     private Stmt stmt() {
-
+      Stmt stmt = null;
+      switch(token) {
+        case 'f':
+          stmt = ifStmt();
+          break;
+        case 'w':
+          stmt = whileStmt();
+          break;
+        case 'b':
+          stmt = breakStmt();
+          break;
+        case 'p':
+          stmt = printStmt();
+          break;
+        default:
+          stmt = expr();
+      }
+      return stmt;
     }
 
     // IfStmt ::= 'f' '(' Expr ')' '{' { Stmt } '}' [ 'e' '{' { Stmt } '}' ]
     private IfStmt ifStmt() {
-
+      IfStmt ifStmt = new IfStmt();
+      if (token == 'f') {
+        nextToken();
+        if (token == '(') {
+          nextToken();
+          ifStmt.setExpr(expr());
+          if (token == ')') {
+            nextToken();
+            if (token == '{') {
+              nextToken();
+              while(token != '}') {
+                nextToken();
+                ifStmt.addTopStmt(stmt());
+              }
+              if (token == 'e') {
+                nextToken();
+                if (token == '{') {
+                  nextToken();
+                  while(token != '}') {
+                    nextToken();
+                    ifStmt.addBottomStmt(stmt());
+                  }
+                } else
+                  error();
+              }
+            } else
+              error();
+          } else
+            error();
+        } else
+          error();
+      } else
+        error();
     }
 
     // WhileStmt ::= 'w' '(' Expr ')' '{' { Stmt } '}'
@@ -150,14 +227,17 @@ public class Compiler {
             nextToken();
             if (token == '{') {
               nextToken();
-              whileStmt.setStmt(stmt());
-              if (token == '}') {
-                nextToken();
-              } else error();
-            } else error();
-          } else error();
-        } else error();
-      } else error();
+              while(nextToken != '}') {
+                whileStmt.addStmt(stmt());
+              }
+            } else
+              error();
+          } else
+            error();
+        } else
+          error();
+      } else
+        error();
 
       return whileStmt;
     }
@@ -168,69 +248,148 @@ public class Compiler {
         nextToken();
         if (token == ';') {
           nextToken();
-        } else error();
-      } else error();
+        } else
+          error();
+      } else
+        error();
+
+      return new BreakStmt();
     }
 
     // PrintStmt ::= 'p' '(' Expr { ',' Expr }')'
     private PrintStmt printStmt() {
+      PrintStmt printStmt = new PrintStmt();
       if (token == 'p') {
         nextToken();
         if (token == '(')) {
-          expr();
+          nextToken();
+          printStmt.addExpr(expr());
           while(token == ',') {
             nextToken();
-            expr();
+            printStmt.addExpr(expr());
           }
-        } else error();
-      } else error();
+          if (token == ')') {
+            nextToken();
+          } else
+            error();
+        } else
+          error();
+      } else
+        error();
+
+      return new PrintStmt();
     }
 
     // Expr ::= SimExpr [ RelOp Expr]
     private Expr expr() {
-
+      Expr expr = new Expr();
+      expr.setSimExpr(simExpr());
+      if (token == '=' || token == '#' || token == '<' || token == '>') {
+        expr.setRelOp(relOp);
+        expr.setExpr(expr());
+      }
     }
 
     // SimExpr ::= [Unary] Term { AddOp Term }
     private SimExpr simExpr() {
+      SimExpr simExpr = new SimExpr();
+      if (token == '+' || token == '-' || token == '!'){
+        simExpr.setUnary(unary());
+      }
+      simExpr.setLeftTerm(term());
+      while (token == '+' || token == '-'){
+        simExpr.addAddOp(addOp());
+        simExpr.addRightTerm(term());
+      }
 
+      return simExpr;
     }
 
     // Term ::= Factor { MulOp Factor }
     private Term term() {
+      Term term = new Term();
+      term.setLeftFactor(factor());
+      while (token == '*' || token == '/' || token == '%'){
+        term.addMulOp(mulOp());
+        term.addRightFactor(factor());
+      }
 
+      return term;
     }
 
     // Factor ::= LValue ':' Expr | LValue | '(' Expr ')'
     //              | 'r' '(' ')' | 's' '(' ')' | 't' '(' ')'
     private Factor factor() {
-      Factor factor = null;
+      Factor factor = new Factor();
+      //  'r' '(' ')' | 's' '(' ')' | 't' '(' ')'
       if (token == 'r' || token == 's' || token == 't'){
         nextToken();
         if (token == '(') {
           nextToken();
           if (token == ')') {
             nextToken();
-          } else error();
-        } else error();
+          } else
+            error();
+        } else
+          error();
+      } else if (token == '(') { // '(' Expr ')'
+        nextToken();
+        factor.setExpr(expr());
+        if (token == ')') {
+          nextToken();
+        } else
+          error();
       } else {
-        
+        factor.setLValue(lValue()); // LValue
+        if (token == ':') { // LValue ':' Expr
+          nextToken();
+          factor.setExpr(expr());
+        }
       }
 
       return factor;
     }
 
     // LValue ::= Ident | Ident '[' Expr ']'
-    private LValue lValue() { //# LValue return a string (within LValue class!!!)
+    private LValue lValue() {
+      LValue lValue = new LValue();
 
+      lValue.setIdent(ident());
+      if (token == '[') {
+        nextToken();
+        lValue.setExpr(expr());
+        if (token == ']') {
+          nextToken();
+        } else
+          error();
+      }
       return lValue;
     }
 
 
     // Ident ::= Letter { Letter | Digit }
     private Ident ident() {
+      Ident ident = new Ident();
 
-      return ident;
+      char[] id = new char[64];
+      c = token;
+      if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+        id[0] = c;
+      int i = 1;
+      tokenPos++;
+
+      while (token != ' ') {
+        c = token;
+        if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+          id[i] = token;
+          tokenPos++;
+          i++;
+        }
+      }
+      id[i] = '\0';
+      nextToken();
+
+      return new Ident(id);
     }
 
     // RelOp ::= '=' | '#' | '<' | '>'
@@ -239,7 +398,8 @@ public class Compiler {
       if (token == '=' || token == '#' || token == '<' || token == '>'){
         relOp = new RelOp(token);
         nextToken();
-      } else error();
+      } else
+        error();
       return relOp;
     }
 
@@ -249,7 +409,8 @@ public class Compiler {
       if (token == '+' || token == '-'){
         addOp = new AddOp(token);
         nextToken();
-      } else error();
+      } else
+        error();
       return addOp;
     }
 
@@ -259,7 +420,8 @@ public class Compiler {
       if (token == '*' || token == '/' || token == '%'){
         mulOp = new MulOp(token);
         nextToken();
-      } else error();
+      } else
+        error();
       return mulOp;
     }
 
@@ -269,7 +431,8 @@ public class Compiler {
       if (token == '+' || token == '-' || token == '!'){
         un = new Unary(token);
         nextToken();
-      } else error();
+      } else
+        error();
       return un;
     }
 
@@ -279,7 +442,8 @@ public class Compiler {
       if (c >= '0' && c <= '9') {
         num = new Digit(token);
         nextToken();
-      } else error();
+      } else
+        error();
       return num;
     }
 
