@@ -5,14 +5,23 @@
 */
 
 package AST;
+import java.util.ArrayList;
 
 public class StmtBlock {
 
-  private ArrayList<VariableDecl> variableDecl;
-  private ArrayList<Stmt> stmt;
+  private ArrayList<VariableDecl> variableDeclList;
+  private ArrayList<Stmt> stmtList;
 
-  public StmtBloc() {
-    variableDecl = new ArrayList<VariableDecl>();
-    stmt = new ArrayList<Stmt>();
+  public void addVariableDecl(VariableDecl vd) {
+    variableDeclList.add(vd);
+  }
+
+  public void addStmt(Stmt stmt) {
+    stmtList.add(stmt);
+  }
+
+  public StmtBlock() {
+    variableDeclList = new ArrayList<VariableDecl>();
+    stmtList = new ArrayList<Stmt>();
   }
 }

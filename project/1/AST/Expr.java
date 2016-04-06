@@ -6,4 +6,21 @@
 
 package AST;
 
-abstract public class Expr{}
+public class Expr extends Stmt{
+
+  private SimExpr simExpr;
+  private RelOp relOp;
+  private Expr expr;
+
+  public void setSimExpr(SimExpr simExpr) {
+    this.simExpr = simExpr;
+  }
+
+  public void setRelOp(RelOp relOp) {
+    this.relOp = relOp;
+  }
+
+  public void setExpr(Expr expr) {
+    this.expr = expr;
+  }
+}

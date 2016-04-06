@@ -10,7 +10,7 @@ public class VariableDecl {
 
   private Variable variable;
 
-  public VariableDecl(variable) {
+  public VariableDecl(Variable variable) {
     this.variable = variable;
   }
 

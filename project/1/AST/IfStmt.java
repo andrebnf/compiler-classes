@@ -5,6 +5,7 @@
 */
 
 package AST;
+import java.util.ArrayList;
 
 public class IfStmt extends Stmt {
 
@@ -17,11 +18,11 @@ public class IfStmt extends Stmt {
     this.expr = expr;
   }
 
-  public void setTopStmt(stmt) {
+  public void addTopStmt(Stmt stmt) {
     stmtTopList.add(stmt);
   }
 
-  public void setBottomStmt(stmt) {
+  public void addBottomStmt(Stmt stmt) {
     stmtBottomList.add(stmt);
   }
 

@@ -5,6 +5,7 @@
 */
 
 package AST;
+import java.util.ArrayList;
 
 public class WhileStmt extends Stmt {
 
@@ -12,7 +13,7 @@ public class WhileStmt extends Stmt {
   private ArrayList<Stmt> stmtList;
 
   public void addStmt(Stmt stmt) {
-    stmtList.add(stmt)
+    stmtList.add(stmt);
   }
 
   public void setExpr(Expr expr) {

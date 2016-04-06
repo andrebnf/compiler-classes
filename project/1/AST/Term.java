@@ -5,6 +5,7 @@
 */
 
 package AST;
+import java.util.ArrayList;
 
 public class Term {
   private Factor leftFactor;
@@ -19,7 +20,7 @@ public class Term {
     rightFactorsList.add(rightFactor);
   }
 
-  public void addMulOp(MulOp mulop){
+  public void addMulOp(MulOp mulOp){
     mulOpsList.add(mulOp);
   }
 

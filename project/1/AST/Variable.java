@@ -9,14 +9,14 @@ package AST;
 public class Variable {
 
   private Type type;
-  private Stmt stmt;
+  private Ident ident;
 
   public void setType(Type type) {
     this.type = type;
   }
 
-  public void setStmt(Stmt stmt) {
-    this.stmt = stmt;
+  public void setIdent(Ident ident) {
+    this.ident = ident;
   }
 
 }

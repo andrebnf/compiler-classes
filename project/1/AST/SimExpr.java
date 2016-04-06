@@ -5,8 +5,9 @@
 */
 
 package AST;
+import java.util.ArrayList;
 
-public class SimExpr extends Expr {
+public class SimExpr {
   private Unary unary;
   private Term leftTerm;
   private ArrayList<AddOp> addOpsList;

@@ -6,4 +6,12 @@
 
 package AST;
 
-abstract public class Type {}
+abstract public class Type {
+
+  private char c;
+
+  public void setTypeId(char c) {
+    this.c = c;
+  }
+
+}

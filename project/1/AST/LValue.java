@@ -9,6 +9,11 @@ package AST;
 public class LValue {
 
   private Ident ident;
+  private Expr expr;
+
+  public void setExpr(Expr expr){
+    this.expr = expr;
+  }
 
   public LValue(Ident ident) {
     this.ident = ident;
