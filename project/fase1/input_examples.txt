@@ -1,0 +1,31 @@
+/*
+Andre Bonfatti 408182
+Thales Chagas 408557
+*/
+
+
+# Testes de input correto
+char []input = "vm(){}".toCharArray();
+char []input = "v m(){i}".toCharArray();
+char []input = "v m (){;}".toCharArray();
+char []input = "v m ( ) { i a ; }".toCharArray();
+char []input = "v m ( ) {ia;}".toCharArray();
+char []input = "vm(){i[]a;}".toCharArray();
+char []input = "vm(){c a ;i[]x;f(b;);}".toCharArray();
+char []input = "vm(){a+b=(!d-e);}".toCharArray();
+char []input = "vm(){i9(r()>s())}".toCharArray();
+char []input = "vm(){c; i[]y;}".toCharArray();
+char []input = "vm(){w(+(L D)){}}".toCharArray();
+
+#Teste de input errado
+char []input = "vm(){".toCharArray();
+char []input = "v m(){i}".toCharArray();
+char []input = "v m ({;}".toCharArray();
+char []input = "v m ( ) { i a ; }".toCharArray();
+char []input = "v m ( ) {ia~}".toCharArray();
+char []input = "vm(){i[]a;}".toCharArray();
+char []input = "vm(){c a ;i[]f(b;);}".toCharArray();
+char []input = "vm(){a+b=(!de);}".toCharArray();
+char []input = "vm(){i(r()>s())}".toCharArray();
+char []input = "vm(){c; i[]}".toCharArray();
+char []input = "vm(){w(+(D)){}}".toCharArray();
