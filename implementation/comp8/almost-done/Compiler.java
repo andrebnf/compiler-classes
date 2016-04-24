@@ -1,36 +1,36 @@
 /*
     comp8
-    
-    Variables now can have any number of characters and numbers any number 
+
+    Variables now can have any number of characters and numbers any number
     of digits. There are new keywords and new non-terminals. The operator
     set includes the comparison operators. There are a few statements.
-    Anything after // till the end of the line is a comment. 
+    Anything after // till the end of the line is a comment.
     Note that VarDecList was modified.
-    
+
     The input is now taken from a file.
     Method error now prints the line in which the error occurred.
-    
-    
+
+
     Grammar:
        Program ::= [ "var" VarDecList ";" ] CompositeStatement
        CompositeStatement ::= "begin" StatementList "end"
        StatementList ::= | Statement ";" StatementList
        Statement ::= AssignmentStatement | IfStatement | ReadStatement |
           WriteStatement
-       AssignmentStatement ::= Variable "="  Expr  
-       IfStatement ::= "if" Expr "then" StatementList [ "else" StatementList ] "endif" 
+       AssignmentStatement ::= Variable "="  Expr
+       IfStatement ::= "if" Expr "then" StatementList [ "else" StatementList ] "endif"
        ReadStatement ::= "read" "(" Variable ")"
        WriteStatement ::= "write" "(" Expr ")"
-          
-       Variable ::= Letter { Letter } 
-       VarDecList ::= Variable | Variable "," VarDecList 
+
+       Variable ::= Letter { Letter }
+       VarDecList ::= Variable | Variable "," VarDecList
        Expr::=  '(' oper Expr  Expr ')' | Number | Variable
        Oper ::= '+' | '-' | '*' | '/' | '<' | '<=' | '>' | '>='| '==' | '<>'
        Number ::= Digit { Digit }
        Digit ::= '0'| '1' | ... | '9'
        Letter ::= 'A' | 'B'| ... | 'Z'| 'a'| 'b' | ... | 'z'
-       
-   Anything between [] is optional. Anything between { e } can be 
+
+   Anything between [] is optional. Anything between { e } can be
    repeated zero or more times.
 */
 
@@ -40,7 +40,7 @@ import Lexer.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
- 
+
 
 public class Compiler {
 
@@ -66,21 +66,21 @@ public class Compiler {
         tokenPos = 0;
         lineNumber = 1;
         nextToken();
-        
+
         symbolTable = new Hashtable<String, Variable>();
         Program e = program();
         if (token != Symbol.EOF)
           error("End program expected");
-          
+
         return e;
     }
 
 	// Program ::= [ "var" VarDecList ";" ] CompositeStatement
     private Program program(){
-    	
-    	ArrayList<Variable> alv = null; 
+
+    	ArrayList<Variable> alv = null;
     	StatementList sl;
-    	
+
     	if(token == Symbol.VAR ){
     		nextToken();
     		alv = varDecList();
@@ -91,16 +91,16 @@ public class Compiler {
     		}
     	}
     	sl = compositeStatement();
-    	
+
     	return new Program(alv, sl);
-    
+
     }
 
-          //  CompositeStatement ::= "begin" StatementList "end"    
+          //  CompositeStatement ::= "begin" StatementList "end"
     private StatementList compositeStatement() {
-   	     
+
    				StatementList sm = null;
-   		
+
    			if(token == Symbol.BEGIN){
    				nextToken();
    				sm = statementList();
@@ -109,54 +109,54 @@ public class Compiler {
    				}else{
    					error("missing end");
    				}
-   				
-   				
+
+
    			}else{
    				error("missing begin");
-   			} 						
-   
+   			}
+
    			return sm;
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
           //  StatementList ::= | Statement ";" StatementList
     private StatementList statementList() {
     		ArrayList<Statement> sl = new ArrayList<Statement>();
-    		Statement st; 
-    		
-    	
+    		Statement st;
+
+
     		while(true){
-    			
-    			st = statement();		
-    			
+
+    			st = statement();
+
     			if(st==null){
-    				break;	
+    				break;
     			}else{
     				sl.add(st);
     				if(token==Symbol.SEMICOLON){
     					nextToken();
     				}else{
     					error("missing semicolon");
-    					
+
     				}
-    			}	
-    		}	
-    		
+    			}
+    		}
+
     		return new StatementList(sl);
    	}
 
 
 
         /*  Statement ::= AssignmentStatement | IfStatement | ReadStatement |                          WriteStatement
-        */            
+        */
     private Statement statement() {
-        
+
         	Statement s = null;
-        	
+
         	if(Symbol.IDENT == token) {
         		s = assignmentStatement();
         	} else if(Symbol.IF == token) {
@@ -166,25 +166,25 @@ public class Compiler {
         	} else if(Symbol.READ == token) {
         		s = readStatement();
         	}
-        
+
         return s;
-        
-        
+
+
     }
     //AssignmentStatement ::= Variable "="  Expr
     private AssignmentStatement assignmentStatement() {
-        
+
         VariableExpr var = null;
         Expr expr = null;
-        
+
         if(token==Symbol.IDENT){
-        
+
         	// the current token is Symbol.IDENT and 		stringValue
           // contains the identifier
         String name = stringValue;
-        
-        	nextToken();         
-        
+
+        	nextToken();
+
           // is the variable in the symbol table ? Variables are inserted in the
           // symbol table when they are declared. It the variable is not there, it has
           // not been declared.
@@ -201,20 +201,20 @@ public class Compiler {
           	error("Falta =");
           	}
           }
-        }  
-    
+        }
+
     	return new AssignmentStatement(var,expr);
-    
+
     }
-    
-    
-     //  IfStatement ::= "if" Expr "then" StatementList [ "else" StatementList ] "endif"   
+
+
+     //  IfStatement ::= "if" Expr "then" StatementList [ "else" StatementList ] "endif"
     private IfStatement ifStatement() {
-    
+
     Expr e = null;
 	StatementList thenPart = null;
 	StatementList elsePart = null;
-	
+
 	if(token==Symbol.IF){
 		nextToken();
 		e = expr();
@@ -236,29 +236,29 @@ public class Compiler {
 	}else{
 	error("Falta if");
 	}
-    
+
     return new IfStatement(e,thenPart,elsePart);
-    	
+
     }
-            
-          
+
+
      //  ReadStatement ::= "read" "(" Variable ")"
     private ReadStatement readStatement() {
     	VariableExpr var = null;
-        
+
 		if(token == Symbol.READ) {
 			nextToken();
 			if(token == Symbol.LEFTPAR) {
 				nextToken();
 				// check if the variable was declared
 				if(token==Symbol.IDENT){
-        
+
 					// the current token is Symbol.IDENT and 		stringValue
 				  	// contains the identifier
 		    		String name = stringValue;
-		    
-		    		nextToken();         
-		    
+
+		    		nextToken();
+
 		      		// is the variable in the symbol table ? Variables are inserted in the
 		      		// symbol table when they are declared. It the variable is not there, it has
 		      		// not been declared.
@@ -274,18 +274,18 @@ public class Compiler {
 				  	}
 				}
 			} else
-				error("( esperado");	
+				error("( esperado");
 		} else
 			error("read esperado");
         return new ReadStatement(var);
-        
-    }
-    
 
-     // WriteStatement ::= "write" "(" Expr ")"    
+    }
+
+
+     // WriteStatement ::= "write" "(" Expr ")"
     private WriteStatement writeStatement() {
     	Expr expr = null;
-    	
+
     	if(token == Symbol.WRITE) {
     		nextToken();
     		if(token == Symbol.LEFTPAR) {
@@ -301,10 +301,10 @@ public class Compiler {
     		error("write esperado");
     	return new WriteStatement(expr);
     }
-        
-        
-            
-    //   VarDecList ::= Variable | Variable "," VarDecList ";"            
+
+
+
+    //   VarDecList ::= Variable | Variable "," VarDecList ";"
     private ArrayList<Variable> varDecList() {
 		ArrayList<Variable> retorno = new ArrayList<Variable>();
         Variable variable = varDec();
@@ -313,7 +313,7 @@ public class Compiler {
             nextToken();
 			retorno.add(varDec());
 		}
-		
+
 		if(token == Symbol.SEMICOLON) {
 			nextToken();
 		} else
@@ -324,7 +324,7 @@ public class Compiler {
 
     private Variable varDec() {
         Variable v = null;
-        
+
           // semantic analysis
           // if the name is in the symbol table, the variable has been declared twice.
           if(token == Symbol.IDENT) {
@@ -338,35 +338,35 @@ public class Compiler {
           		error("variavel declarada");
           	}
           }
-          return v;          
+          return v;
     }
 
 
     //Expr::=  '(' oper Expr  Expr ')' | number | Letter
     private Expr expr() {
-		
-		Expr res = null;		
+
+		Expr res = null;
 
 		if(token == Symbol.LEFTPAR){
 			nextToken();
 			Symbol op;
-			op = oper();						
+			op = oper();
 			Expr ExprE, ExprD;
 			ExprE = expr();
 			ExprD = expr();
 
 			if(token == Symbol.RIGHTPAR){
 				nextToken();
-			
+
 				res = new CompositeExpr(op, ExprE, ExprD);
 
 			}
 			else
-				error(") esperado");						
-		} else 
+				error(") esperado");
+		} else
 			if(token == Symbol.NUMBER) {
 				res = new NumberExpr(numberValue);
-				nextToken();		
+				nextToken();
 			} else {
 				if(token == Symbol.IDENT){
 					String name = stringValue;
@@ -378,13 +378,13 @@ public class Compiler {
 						error("Variavel nao declarada: "+ name);
 				} else
 					error("simbolo não esperado");
-				
+
 			}
 
-		return res;	
+		return res;
     }
-        
-    
+
+
 	private Symbol oper() {
 		Symbol aux = null;
 		if (token == Symbol.PLUS || token == Symbol.MINUS || token == Symbol.MULT || token == Symbol.DIV || token == Symbol.LE || token == Symbol.LT || token == Symbol.GE || token == Symbol.GT || token == Symbol.EQ || token == Symbol.NEQ) {
@@ -395,58 +395,57 @@ public class Compiler {
 			error("Operador inválido.");
 		}
 		return aux;
-	}  
+	}
 
     private void nextToken() {
-    	while(tokenPos < input.length && 
-    		(input[tokenPos] == ' ' || 
-    		input[tokenPos] == '\n' ||
-    		input[tokenPos] == '\t' ||
-    		input[tokenPos] == '\r')) {
+    	while(tokenPos < input.length && (input[tokenPos] == ' ' || input[tokenPos] == '\n'
+                                || input[tokenPos] == '\t' ||	input[tokenPos] == '\r')) {
     		if(input[tokenPos] == '\n')
-    			lineNumber++;
+          lineNumber++;
     		tokenPos++;
-    	} 
-    	
+    	}
+
     	if(tokenPos == input.length) {
     		token = Symbol.EOF;
     		return;
     	}
-    	
-    	//ignorando comentario //
+
+    	// ignorando comentario //
     	if(input[tokenPos] == '/' &&
     		input[tokenPos+1] == '/') {
-    		while(tokenPos < input.length && 
-    			input[tokenPos] != '\n')
-    			tokenPos++;
-	    	if(tokenPos == input.length) {
-	    		token = Symbol.EOF;
-	    		return;
-    		}
-    		
-    		lineNumber++;	
-    		nextToken();	
+    		while(tokenPos < input.length && input[tokenPos] != '\n')	tokenPos++;
+  	    	if(tokenPos == input.length) {
+  	    		token = Symbol.EOF;
+  	    		return;
+      		}
+
+    		lineNumber++;
+    		nextToken();
     	}
-    	
+
     	String buffer = "";
     	if(Character.isLetter(input[tokenPos])) {
 			while(Character.isLetter(input[tokenPos])) {
 				buffer += input[tokenPos++];
 			}
-			
+
 			if(buffer != "") {
 				token = keywordsTable.get(buffer);
 				if(token == null) {
 					token = Symbol.IDENT;
 					stringValue = buffer;
 				}
-			}
+
     	} else if(Character.isDigit(input[tokenPos])) {
     		while(Character.isDigit(input[tokenPos])) {
     			buffer += input[tokenPos++];
-    		}	
-    		numberValue = Integer.parseInt(buffer);
-    		if(numberValue > MaxValueInteger) {
+    		}
+        try {
+    		  numberValue = Integer.parseInt(buffer);
+        } catch (NumberFormatException e){
+          error("Number out of limits");
+        }
+        if(numberValue > MaxValueInteger) {
     			error("overflow int");
     		}
     		token = Symbol.NUMBER;
@@ -457,7 +456,7 @@ public class Compiler {
     				break;
     			case '-':
     				token = Symbol.MINUS;
-    				break;	
+    				break;
     			case '*':
     				token = Symbol.MULT;
     				break;
@@ -477,7 +476,7 @@ public class Compiler {
     					token = Symbol.GE;
     				} else
     					token = Symbol.GT;
-    				break;	
+    				break;
     			case '!':
     				if(input[tokenPos+1] == '=') {
     					tokenPos++;
@@ -485,7 +484,7 @@ public class Compiler {
     				} else
     					error("= esperado");
     				break;
-    			case '=':	
+    			case '=':
     				if(input[tokenPos+1] == '=') {
     					tokenPos++;
     					token = Symbol.EQ;
@@ -508,35 +507,35 @@ public class Compiler {
     			default :
     				error("token nao identificado");
     		}
-    		tokenPos++;    		
+    		tokenPos++;
     	}
-    	
+
     }
-    
+
     private void error(String errorMsg) {
-        if ( tokenPos == 0 ) 
-          tokenPos = 1; 
-        else 
+        if ( tokenPos == 0 )
+          tokenPos = 1;
+        else
           if ( tokenPos >= input.length )
             tokenPos = input.length;
-        
+
         String strInput = new String( input, tokenPos - 1, input.length - tokenPos + 1 );
         String strError = "Error at \"" + strInput + "\"";
         System.out.println( strError );
         System.out.println( errorMsg );
         throw new RuntimeException(strError);
     }
-    
+
     private int  tokenPos;
     private char []input;
- 	private Hashtable<String, Variable> symbolTable;   
- 	
- 	private Symbol token; // notem a mudanca aqui!
+ 	  private Hashtable<String, Variable> symbolTable;
+
+ 	  private Symbol token;
     private String stringValue;
     private int numberValue;
     // number of current line. Starts with 1
     private int lineNumber;
     private static final int MaxValueInteger = 32768; // 2 ^ 15
 
- 	  
+
 }
