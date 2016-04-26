@@ -1,14 +1,14 @@
 /*
     comp9
-    
+
     Main changes from the previous compiler:
-      - the lexical analyzer was separated from the syntactical analyzer. 
-        It was put in class Lexer. nextToken is now called by 
+      - the lexical analyzer was separated from the syntactical analyzer.
+        It was put in class Lexer. nextToken is now called by
            lexer.nextToken()
-        where lexer is an instance variable of Compiler, initialized from a parameter 
+        where lexer is an instance variable of Compiler, initialized from a parameter
         of the constructor. The token is got by
           lexer.token
-      - the error treatment was also removed from the syntactical analyzer. It is 
+      - the error treatment was also removed from the syntactical analyzer. It is
         in class CompilerError;
       - variables now have types. They can be integer, boolean, and char. The rules for
         them are similar to Java;
@@ -17,29 +17,29 @@
       - error messages can be directed to any stream;
       - variable declaration are now more Pascal like;
       - expressions resemble expressions in Java/C/C++
-      
-    
+
+
     Grammar:
        Program ::= [ "var" VarDecList ] CompositeStatement
        CompositeStatement ::= "begin" StatementList "end"
        StatementList ::= | Statement ";" StatementList
        Statement ::= AssignmentStatement | IfStatement | ReadStatement |
           WriteStatement
-       AssignmentStatement ::= Variable "="  OrExpr  
-       IfStatement ::= "if" OrExpr "then" StatementList [ "else" StatementList ] "endif" 
+       AssignmentStatement ::= Variable "="  OrExpr
+       IfStatement ::= "if" OrExpr "then" StatementList [ "else" StatementList ] "endif"
        ReadStatement ::= "read" "(" Variable ")"
        WriteStatement ::= "write" "(" OrExpr ")"
-          
+
        VarDecList ::= VarDecList2  { VarDecList2  }
        VarDecList2 ::= Ident { ',' Ident } ':' Type ';'
-       Ident ::= Letter { Letter } 
+       Ident ::= Letter { Letter }
        Type ::= "integer" | "boolean" | "char"
        OrExpr ::= AndExpr [ "or" AndExpr ]
        AndExpr ::= RelExpr [ "and" RelExpr ]
        RelExpr ::= AddExpr [ RelOp AddExpr ]
        AddExpr ::= MultExpr { AddOp MultExpr }
        MultExpr ::= SimpleExpr { MultOp SimpleExpr }
-       SimpleExpr ::= Number | Variable | "true" | "false" | Character 
+       SimpleExpr ::= Number | Variable | "true" | "false" | Character
           | '(' OrExpr ')' | "not" SimpleExpr | AddOp SimpleExpr
        RelOp ::= '<' | '<=' | '>' | '>='| '==' | '<>'
        AddOp ::= '+'| '-'
@@ -47,10 +47,10 @@
        Number ::= ['+'|'-'] Digit { Digit }
        Digit ::= '0'| '1' | ... | '9'
        Letter ::= 'A' | 'B'| ... | 'Z'| 'a'| 'b' | ... | 'z'
-       
-   Character is a Letter enclosed between ' and ', like 'A', 'e' as in Java, C++, etc. 
-   Anything between [] is optional. Anything between { e } can be 
-   repeated zero or more times. 
+
+   Character is a Letter enclosed between ' and ', like 'A', 'e' as in Java, C++, etc.
+   Anything between [] is optional. Anything between { e } can be
+   repeated zero or more times.
 */
 
 import AST.*;
@@ -60,41 +60,41 @@ import java.io.*;
 
 
 public class Compiler {
-    
-      // compile must receive an input with an character less than 
-      // p_input.lenght
+
+    // compile must receive an input with an character less than
+    // p_input.lenght
     public Program compile( char []input, PrintWriter outError ) {
-        
+
         symbolTable = new Hashtable<String, Variable>();
         error = new CompilerError( outError );
         lexer = new Lexer(input, error);
         error.setLexer(lexer);
-        
+
         lexer.nextToken();
         return program();
         }
-    
+
     private Program program() {
         // Program ::= [ "var" VarDecList ] CompositeStatement
-        
+
         ArrayList<Variable> arrayVariable = null;
-        
+
         if ( lexer.token == Symbol.VAR )  {
           lexer.nextToken();
           arrayVariable = varDecList();
         }
         Program program = new Program( arrayVariable, compositeStatement() );
-        if ( lexer.token != Symbol.EOF ) 
+        if ( lexer.token != Symbol.EOF )
           error.signal("EOF expected");
         return program;
     }
-        
+
 
     private StatementList compositeStatement() {
           // CompositeStatement ::= "begin" StatementList "end"
           //  StatementList ::= | Statement ";" StatementList
-        
-        if ( lexer.token != Symbol.BEGIN ) 
+
+        if ( lexer.token != Symbol.BEGIN )
             error.signal("BEGIN expected");
         lexer.nextToken();
         StatementList sl = statementList();
@@ -118,12 +118,12 @@ public class Compiler {
             }
         return new StatementList(v);
     }
-            
+
     private Statement statement() {
         /*  Statement ::= AssignmentStatement | IfStatement | ReadStatement |
                           WriteStatement
         */
-        
+
         switch (lexer.token) {
             case IDENT :
               return assignmentStatement();
@@ -139,21 +139,21 @@ public class Compiler {
         }
         return null;
     }
-    
+
     private AssignmentStatement assignmentStatement() {
-        
+
         String name = lexer.getStringValue();
-        
+
           // is the variable in the symbol table ? Variables are inserted in the
           // symbol table when they are declared. It the variable is not there, it has
           // not been declared.
-          
+
         Variable v = (Variable ) symbolTable.get(name);
           // was it in the symbol table ?
-        if ( v == null ) 
+        if ( v == null )
             error.signal("Variable " + name + " was not declared");
         lexer.nextToken();
-        if ( lexer.token != Symbol.ASSIGN ) 
+        if ( lexer.token != Symbol.ASSIGN )
           error.signal("= expected");
         lexer.nextToken();
         Expr right = orExpr();
@@ -161,21 +161,21 @@ public class Compiler {
           // check if expression has the same type as variable
         if ( v.getType() != right.getType() )
           error.signal("Type error in assignment");
-          
+
         return new AssignmentStatement( v, right );
     }
-    
-    
+
+
     private IfStatement ifStatement() {
-        
+
         lexer.nextToken();
         Expr e = orExpr();
           // semantic analysis
           // check if expression has type boolean
-        if ( e.getType() != Type.booleanType ) 
+        if ( e.getType() != Type.booleanType )
           error.signal("Boolean type expected in if expression");
-        
-        if ( lexer.token != Symbol.THEN ) 
+
+        if ( lexer.token != Symbol.THEN )
           error.signal("then expected");
         lexer.nextToken();
         StatementList thenPart = statementList();
@@ -189,12 +189,12 @@ public class Compiler {
         lexer.nextToken();
         return new IfStatement( e, thenPart, elsePart );
     }
-            
-          
-            
+
+
+
     private ReadStatement readStatement() {
         lexer.nextToken();
-        if ( lexer.token != Symbol.LEFTPAR ) 
+        if ( lexer.token != Symbol.LEFTPAR )
           error.signal("( expected");
         lexer.nextToken();
         if ( lexer.token != Symbol.IDENT )
@@ -203,43 +203,43 @@ public class Compiler {
           // check if the variable was declared
         String name = lexer.getStringValue();
         Variable v = (Variable ) symbolTable.get(name);
-        if ( v == null ) 
+        if ( v == null )
           error.signal("Variable " + name + " was not declared");
           // semantic analysis
           // check if variable has type char or integer
-        if ( v.getType() != Type.charType && v.getType() != Type.integerType ) 
+        if ( v.getType() != Type.charType && v.getType() != Type.integerType )
           error.signal("Variable should have type char or integer");
-          
+
         lexer.nextToken();
-        if ( lexer.token != Symbol.RIGHTPAR ) 
+        if ( lexer.token != Symbol.RIGHTPAR )
           error.signal(") expected");
         lexer.nextToken();
         return new ReadStatement( v );
     }
-    
-    
+
+
     private WriteStatement writeStatement() {
         lexer.nextToken();
-        if ( lexer.token != Symbol.LEFTPAR ) 
+        if ( lexer.token != Symbol.LEFTPAR )
           error.signal("( expected");
         lexer.nextToken();
           // expression may be of any type
         Expr e = orExpr();
-        if ( lexer.token != Symbol.RIGHTPAR ) 
+        if ( lexer.token != Symbol.RIGHTPAR )
           error.signal(") expected");
         lexer.nextToken();
         return new WriteStatement( e );
     }
-        
-        
-            
-            
+
+
+
+
     private ArrayList<Variable> varDecList() {
         //  VarDecList ::= VarDecList2  { VarDecList2  }
 
-        
+
         ArrayList<Variable> varList = new ArrayList<Variable>();
-        
+
         varDecList2(varList);
         while ( lexer.token == Symbol.IDENT )
           varDecList2(varList);
@@ -250,7 +250,7 @@ public class Compiler {
         //  VarDecList2 ::= Ident { ',' Ident } ':' Type ';'
 
         ArrayList<Variable> lastVarList = new ArrayList<Variable>();
-        
+
         while ( true ) {
           if ( lexer.token != Symbol.IDENT )
             error.signal("Identifier expected");
@@ -270,10 +270,10 @@ public class Compiler {
           symbolTable.put( name, v );
             // list of the last variables declared. They don't have types yet
           lastVarList.add(v);
-          
-          if ( lexer.token == Symbol.COMMA ) 
+
+          if ( lexer.token == Symbol.COMMA )
             lexer.nextToken();
-          else 
+          else
             break;
         }
 
@@ -291,17 +291,17 @@ public class Compiler {
             // add variable to the list of variable
           varList.add(v);
         }
-     
-        if ( lexer.token != Symbol.SEMICOLON ) 
+
+        if ( lexer.token != Symbol.SEMICOLON )
           error.signal("; expected");
-        lexer.nextToken();  
+        lexer.nextToken();
     }
-          
-        
+
+
 
     private Type type() {
         Type result;
-        
+
         switch ( lexer.token ) {
             case INTEGER :
               result = Type.integerType;
@@ -319,13 +319,13 @@ public class Compiler {
         lexer.nextToken();
         return result;
     }
-    
+
 
     private Expr orExpr() {
-      /*  
+      /*
         OrExpr ::= AndExpr [ "or" AndExpr ]
       */
-      
+
       Expr left, right;
       left = andExpr();
       if ( lexer.token == Symbol.OR ) {
@@ -370,17 +370,17 @@ public class Compiler {
          lexer.nextToken();
          right = addExpr();
            // semantic analysis
-         if ( left.getType() != right.getType() ) 
+         if ( left.getType() != right.getType() )
            error.signal("Type error in expression");
          left = new CompositeExpr( left, op, right );
        }
        return left;
     }
-    
+
     private Expr addExpr() {
       /*
         AddExpr ::= MultExpr { AddOp MultExpr }
-        
+
       */
       Symbol  op;
       Expr left, right;
@@ -397,11 +397,11 @@ public class Compiler {
       }
       return left;
     }
-       
+
     private Expr multExpr() {
      /*
         MultExpr ::= SimpleExpr { MultOp SimpleExpr }
-     */    
+     */
        Expr left, right;
        left = simpleExpr();
        Symbol op;
@@ -417,15 +417,15 @@ public class Compiler {
        }
        return left;
     }
-           
+
     private Expr simpleExpr() {
       /*
-        SimpleExpr ::= Number |  "true" | "false" | Character 
-           | '(' Expr ')' | "not" SimpleExpr | Variable 
+        SimpleExpr ::= Number |  "true" | "false" | Character
+           | '(' Expr ')' | "not" SimpleExpr | Variable
       */
-      
+
       Expr e;
-      
+
         // note we test the lexer.getToken() to decide which production to use
       switch ( lexer.token ) {
          case NUMBER :
@@ -474,54 +474,54 @@ public class Compiler {
            return new UnaryExpr( e, Symbol.MINUS );
          default :
              // an identifier
-           if ( lexer.token != Symbol.IDENT ) 
+           if ( lexer.token != Symbol.IDENT )
              error.signal("Identifier expected");
            String name = lexer.getStringValue();
            lexer.nextToken();
            Variable v = (Variable ) symbolTable.get( name );
              // semantic analysis
-             // was the variable declared ? 
-           if ( v == null ) 
+             // was the variable declared ?
+           if ( v == null )
              error.signal("Variable " + name + " was not declared");
            return new VariableExpr(v);
         }
-            
+
     }
-    
-    
-    
+
+
+
     private NumberExpr number() {
-        
+
         NumberExpr e = null;
-        
+
           // the number value is stored in lexer.getToken().value as an object of Integer.
           // Method intValue returns that value as an value of type int.
         int value = lexer.getNumberValue();
         lexer.nextToken();
         return new NumberExpr( value );
     }
-    
+
     /*
     private boolean checkTypes( Type left, Symbol op, Type right ) {
         // return true if  left and right can be the types of a composite
-        // expression with operator op 
+        // expression with operator op
 
        if ( op == Symbol.EQ || op == Symbol.NEQ || op == Symbol.LE || op == Symbol.LT ||
                  op == Symbol.GE || op == Symbol.GT )
           return left == right;
        else if ( op == Symbol.PLUS || op == Symbol.MINUS || op == Symbol.DIV ||
                  op == Symbol.MULT || op == Symbol.REMAINDER ) {
-                
+
           if ( left != right || left != Type.integerType )
              return false;
-          else 
+          else
              return true;
        }
        else if ( op == Symbol.AND || op == Symbol.OR ) {
-          if ( left != Type.booleanType || 
+          if ( left != Type.booleanType ||
                right != Type.booleanType )
              return false;
-          else 
+          else
              return true;
        }
        else {
@@ -529,14 +529,14 @@ public class Compiler {
           return true;
        }
     }
-    
-    
+
+
 
     */
-    
+
     private Hashtable<String, Variable> symbolTable;
     private Lexer lexer;
     private CompilerError error;
 
-        
+
 }

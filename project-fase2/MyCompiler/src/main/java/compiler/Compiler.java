@@ -1,3 +1,13 @@
+package main.java.compiler;
+
+import main.java.ast.*;
+import main.java.ast.Number;
+import main.java.lexer.*;
+
+import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.util.Hashtable;
+
 /**
 * UFSCar - Universidade Federal de São Carlos - Campus Sorocaba
 * 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
@@ -11,81 +21,87 @@ Projeto de Implementação - Fase 1
 == Grammar
 
 Program      ::= Decl
-Decl         ::= 'v' 'm' '(' ')' StmtBlock
+Decl         ::= 'void' 'main' '(' ')' StmtBlock
 StmtBlock    ::= '{' { VariableDecl } { Stmt } '}'
 VariableDecl ::= Variable ';'
 Variable     ::= Type Ident
 Type         ::= StdType | ArrayType
-StdType      ::= 'i' | 'd' | 'c'
-ArrayType    ::= StdType '[' ']'
+StdType      ::= 'int' | 'double' | 'cchar'
+ArrayType    ::= StdType '[' IntNumber ']'
 Stmt         ::= Expr ';' | IfStmt | WhileStmt | BreakStmt | PrintStmt
-IfStmt       ::= 'f' '(' Expr ')' '{' { Stmt } '}' [ 'e' '{' { Stmt } '}' ]
-WhileStmt    ::= 'w' '(' Expr ')' '{' { Stmt } '}'
-BreakStmt    ::= 'b' ';'
-PrintStmt    ::= 'p' '(' Expr { ',' Expr }')'
+IfStmt       ::= 'if' '(' Expr ')' '{' { Stmt } '}' [ 'else' '{' { Stmt } '}' ]
+WhileStmt    ::= 'while' '(' Expr ')' '{' { Stmt } '}'
+BreakStmt    ::= 'break' ';'
+PrintStmt    ::= 'print' '(' Expr { ',' Expr } ')' ';'
 Expr         ::= SimExpr [ RelOp Expr]
 SimExpr      ::= [Unary] Term { AddOp Term }
 Term         ::= Factor { MulOp Factor }
-Factor       ::= LValue ':' Expr
+Factor       ::= LValue ':=' Expr
                   | LValue
                   | '(' Expr ')'
-                  | 'r' '(' ')' | 's' '(' ')' | 't' '(' ')'
+                  | 'readInteger' '(' ')' | 'readDouble' '(' ')' | 'readChar' '(' ')'
+                  | CharValue
+                  | Number
 LValue       ::= Ident | Ident '[' Expr ']'
 Ident        ::= Letter { Letter | Digit }
-RelOp        ::= '=' | '#' | '<' | '>'
-AddOp        ::= '+' | '-'
-MulOp        ::= '*' | '/' | '%'
+Number       ::= [ '+' | '-' ] IntNumber [ '.' IntNumber ]
+IntNumber    ::= Digit { Digit }
+RelOp        ::= '=' | '!=' | '<' | '<=' | '>' | '>='
+AddOp        ::= '+' | '-' | '||'
+MulOp        ::= '*' | '/' | '%' | '&&'
 Unary        ::= '+' | '-' | '!'
 Digit        ::= '0' | '1' | ... | '9'
 Letter       ::= 'A' | 'B' | ... | 'Z' | 'a' | 'b' | ... | 'z'
 
 */
 
-package main.java.compiler;
-
-import main.java.ast.*;
-import java.util.ArrayList;
-
 public class Compiler {
+  private Hashtable<String, Variable> symbolTable;
+  private Lexer lexer;
+  private CompilerError error;
 
-  public Program compile( char []p_input ) {
-    input = p_input;
-    tokenPos = 0;
-    nextToken();
+  public Program compile(char []input, PrintWriter outError) {
 
-    Program e = program();
-    if (tokenPos != input.length)
-    error();
+    symbolTable = new Hashtable<String, Variable>();
+    error = new CompilerError(outError);
+    lexer = new Lexer(input, error);
+    error.setLexer(lexer);
 
-    return e;
+    lexer.nextToken();
+
+    return program();
   }
-
 
   // Program ::= Decl
   private Program program() {
-    return new Program(decl());
+    Program p = new Program(decl());
+
+    if ( lexer.token != Symbol.EOF )
+      error.signal("EOF expected");
+
+    return p;
   }
 
-  // Decl ::= 'v' 'm' '(' ')' StmtBlock
+  // Decl ::= 'void' 'main' '(' ')' StmtBlock
   private Decl decl() {
     Decl decl = null;
-    if (token == 'v') {
-      nextToken();
-      if (token == 'm') {
-        nextToken();
-        if (token == '(') {
-          nextToken();
-          if (token == ')') {
-            nextToken();
+    if (lexer.token == Symbol.VOID) {
+      lexer.nextToken();
+      if (lexer.token == Symbol.MAIN) {
+        lexer.nextToken();
+        if (lexer.token == Symbol.LEFTPAR) {
+          lexer.nextToken();
+          if (lexer.token == Symbol.RIGHTPAR) {
+            lexer.nextToken();
             decl = new Decl(stmtBlock());
           } else
-            error();
+            error.signal("Syntax error. Expected `)`");
         } else
-          error();
+          error.signal("Syntax error. Expected `(`");
       } else
-        error();
+        error.signal("Synxtax error. Expected name of function `main`");
     } else
-      error();
+      error.signal("Syntax error. Expected `void`");
 
     return decl;
   }
@@ -94,20 +110,20 @@ public class Compiler {
   private StmtBlock stmtBlock() {
     StmtBlock stmtBlock = new StmtBlock();
 
-    if (token == '{') {
-      nextToken();
+    if (lexer.token == Symbol.LEFTCURLY) {
+      lexer.nextToken();
     } else
-      error();
+      error.signal("Expected a statement block");
 
-    while(token == 'i' || token == 'd' || token == 'c'){ // { VariableDecl }
+    while(lexer.token == Symbol.INT || lexer.token == Symbol.DOUBLE
+            || lexer.token == Symbol.CHARID){ // { VariableDecl }
       stmtBlock.addVariableDecl(variableDecl());
     }
-    while(token != '}') { // { Stmt }
+    while(lexer.token != Symbol.RIGHTCURLY) { // { Stmt }
       stmtBlock.addStmt(stmt());
     }
-
-    if (token == '}') {
-      nextToken();
+    if (lexer.token == Symbol.RIGHTCURLY) {
+      lexer.nextToken();
     }
 
     return stmtBlock;
@@ -116,10 +132,10 @@ public class Compiler {
   // VariableDecl ::= Variable ';'
   private VariableDecl variableDecl() {
     VariableDecl vd = new VariableDecl(variable());
-    if (token == ';') {
-      nextToken();
+    if (lexer.token == Symbol.SEMICOLON) {
+      lexer.nextToken();
     } else
-      error();
+      error.signal("Expected `;`");
 
     return vd;
   }
@@ -130,188 +146,205 @@ public class Compiler {
     variable.setType(type());
     variable.setIdent(ident());
 
+    // SEM - variable must not be declared twice
+    String name = lexer.getStringValue();
+    if (symbolTable.get(name) != null)
+      error.signal("Variable " + name + " has already been declared");
+
+    symbolTable.put(name, variable);
     return variable;
   }
 
   // Type ::= StdType | ArrayType
   private Type type() {
     Type type = null;
-    char old_token = ' ';
-    if (token == 'i' || token == 'd' || token == 'c'){
-      old_token = token;
+    Symbol old_token = null;
+    if (lexer.token == Symbol.INT || lexer.token == Symbol.DOUBLE || lexer.token == Symbol.CHARID){
+      old_token = lexer.token;
       type = stdType();
-      if (token == '[') {
-        type = arrayType();
+      if (lexer.token == Symbol.LEFTBRACE) {
+        ArrayType arr = arrayType();
+        arr.setName(type.getName());
+        type = arr;
       }
     } else
-      error();
+      error.signal("Expected standard type declaration");
     type.setTypeId(old_token);
     return type;
   }
 
-  // StdType ::= 'i' | 'd' | 'c'
+  // StdType ::= 'int' | 'double' | 'char'
   private StdType stdType() {
-    if (token == 'i' || token == 'd' || token == 'c') {
-      nextToken();
+    StdType stdType = null;
+    if (lexer.token == Symbol.INT) {
+      stdType = StdType.intType;
+      lexer.nextToken();
+    } else if (lexer.token == Symbol.DOUBLE) {
+      stdType = StdType.doubleType;
+      lexer.nextToken();
+    } else if (lexer.token == Symbol.CHARID) {
+      stdType = StdType.charType;
+      lexer.nextToken();
     } else
-      error();
+      error.signal("Expected variable type");
 
-    return new StdType();
+    return stdType;
   }
 
-  // ArrayType ::= StdType '[' ']'
+  // ArrayType ::= StdType '[' IntNumber ']'
   private ArrayType arrayType() {
-    if (token == '[') {
-      nextToken();
-      if (token == ']') {
-        nextToken();
-      } else
-        error();
+    if (lexer.token == Symbol.LEFTBRACE) {
+      lexer.nextToken();
+      if (lexer.token == Symbol.INT) {
+        lexer.nextToken();
+        if (lexer.token == Symbol.RIGHTBRACE) {
+          lexer.nextToken();
+        } else
+          error.signal(null);
+      }
     } else
-      error();
+      error.signal(null);
 
-    return new ArrayType();
+    return new ArrayType("temp");
   }
 
   // Stmt ::= Expr ';' | IfStmt | WhileStmt | BreakStmt | PrintStmt
   private Stmt stmt() {
     Stmt stmt = null;
 
-    switch(token) {
-      case 'f':
-        stmt = ifStmt();
-        break;
-      case 'w':
-        stmt = whileStmt();
-        break;
-      case 'b':
-        stmt = breakStmt();
-        break;
-      case 'p':
-        stmt = printStmt();
-        break;
-      default:
-        stmt = expr();
-        if (token == ';')
-          nextToken();
-        else
-          error();
-
-        break;
+    if (lexer.token == Symbol.IF) {
+      stmt = ifStmt();
+    } else if (lexer.token == Symbol.WHILE) {
+      stmt = whileStmt();
+    } else if (lexer.token == Symbol.BREAK) {
+      stmt = breakStmt();
+    } else if (lexer.token == Symbol.PRINT) {
+      stmt = printStmt();
+    } else {
+      stmt = expr();
+      if (lexer.token == Symbol.SEMICOLON)
+        lexer.nextToken();
+      else
+        error.signal("Expected `;`");
     }
+
     return stmt;
   }
 
-  // IfStmt ::= 'f' '(' Expr ')' '{' { Stmt } '}' [ 'e' '{' { Stmt } '}' ]
+  // IfStmt ::= 'if' '(' Expr ')' '{' { Stmt } '}' [ 'else' '{' { Stmt } '}' ]
   private IfStmt ifStmt() {
     IfStmt ifStmt = new IfStmt();
-    if (token == 'f') {
-      nextToken();
-      if (token == '(') {
-        nextToken();
+    if (lexer.token == Symbol.IF) {
+      lexer.nextToken();
+      if (lexer.token == Symbol.LEFTPAR) {
+        lexer.nextToken();
         ifStmt.setExpr(expr());
-        if (token == ')') {
-          nextToken();
-          if (token == '{') {
-            nextToken();
-            while(token != '}') {
+        if (lexer.token == Symbol.RIGHTPAR) {
+          lexer.nextToken();
+          if (lexer.token == Symbol.LEFTCURLY) {
+            lexer.nextToken();
+            while(lexer.token != Symbol.RIGHTCURLY) {
               ifStmt.addTopStmt(stmt());
             }
-            if (token == '}') {
-              nextToken();
-              if (token == 'e') {
-                nextToken();
-                if (token == '{') {
-                  nextToken();
-                  while (token != '}') {
+            if (lexer.token == Symbol.RIGHTCURLY) {
+              lexer.nextToken();
+              if (lexer.token == Symbol.ELSE) {
+                lexer.nextToken();
+                if (lexer.token == Symbol.LEFTCURLY) {
+                  lexer.nextToken();
+                  while (lexer.token != Symbol.RIGHTCURLY) {
                     ifStmt.addBottomStmt(stmt());
                   }
-                  if (token == '}')
-                    nextToken();
+                  if (lexer.token == Symbol.RIGHTCURLY)
+                    lexer.nextToken();
                   else
-                    error();
+                    error.signal(null);
                 } else
-                  error();
+                  error.signal(null);
               }
             } else
-              error();
+              error.signal(null);
           } else
-            error();
+            error.signal(null);
         } else
-          error();
+          error.signal(null);
       } else
-        error();
+        error.signal(null);
     } else
-      error();
+      error.signal(null);
 
     return ifStmt;
   }
 
-  // WhileStmt ::= 'w' '(' Expr ')' '{' { Stmt } '}'
+  // WhileStmt ::= 'while' '(' Expr ')' '{' { Stmt } '}'
   private WhileStmt whileStmt() {
     WhileStmt whileStmt = new WhileStmt();
-    if (token == 'w') {
-      nextToken();
-      if (token == '(') {
-        nextToken();
+    if (lexer.token == Symbol.WHILE) {
+      lexer.nextToken();
+      if (lexer.token == Symbol.LEFTPAR) {
+        lexer.nextToken();
         whileStmt.setExpr(expr());
-        if (token == ')') {
-          nextToken();
-          if (token == '{') {
-            nextToken();
-            while (token != '}') {
+        if (lexer.token == Symbol.RIGHTPAR) {
+          lexer.nextToken();
+          if (lexer.token == Symbol.LEFTCURLY) {
+            lexer.nextToken();
+            while (lexer.token != Symbol.RIGHTCURLY) {
               whileStmt.addStmt(stmt());
             }
-            if (token == '}')
-              nextToken();
+            if (lexer.token == Symbol.RIGHTCURLY)
+              lexer.nextToken();
             else
-              error();
+              error.signal(null);
           } else
-            error();
+            error.signal(null);
         } else
-          error();
+          error.signal(null);
       } else
-        error();
+        error.signal(null);
     } else
-      error();
+      error.signal(null);
 
     return whileStmt;
   }
 
-  // BreakStmt ::= 'b' ';'
+  // BreakStmt ::= 'break' ';'
   private BreakStmt breakStmt() {
-    if (token == 'b') {
-      nextToken();
-      if (token == ';') {
-        nextToken();
+    if (lexer.token == Symbol.BREAK) {
+      lexer.nextToken();
+      if (lexer.token == Symbol.SEMICOLON) {
+        lexer.nextToken();
       } else
-        error();
+        error.signal(null);
     } else
-      error();
+      error.signal(null);
 
     return new BreakStmt();
   }
 
-  // PrintStmt ::= 'p' '(' Expr { ',' Expr }')'
+  // PrintStmt ::= 'print' '(' Expr { ',' Expr }')' ';'
   private PrintStmt printStmt() {
     PrintStmt printStmt = new PrintStmt();
-    if (token == 'p') {
-      nextToken();
-      if (token == '(') {
-        nextToken();
+    if (lexer.token == Symbol.PRINT) {
+      lexer.nextToken();
+      if (lexer.token == Symbol.LEFTPAR) {
+        lexer.nextToken();
         printStmt.addExpr(expr());
-        while(token == ',') {
-          nextToken();
+        while(lexer.token == Symbol.COMMA) {
+          lexer.nextToken();
           printStmt.addExpr(expr());
         }
-        if (token == ')') {
-          nextToken();
+        if (lexer.token == Symbol.RIGHTPAR) {
+          lexer.nextToken();
+          if (lexer.token == Symbol.SEMICOLON) {
+            lexer.nextToken();
+          } else
+            error.signal(null);
         } else
-          error();
+          error.signal(null);
       } else
-        error();
+        error.signal(null);
     } else
-      error();
+      error.signal(null);
 
     return new PrintStmt();
   }
@@ -320,7 +353,9 @@ public class Compiler {
   private Expr expr() {
     Expr expr = new Expr();
     expr.setSimExpr(simExpr());
-    if (token == '=' || token == '#' || token == '<' || token == '>') {
+    if (lexer.token == Symbol.LT || lexer.token == Symbol.LE ||
+            lexer.token == Symbol.GT || lexer.token == Symbol.GE ||
+            lexer.token == Symbol.NEQ || lexer.token == Symbol.EQ) {
       expr.setRelOp(relOp());
       expr.setExpr(expr());
     }
@@ -331,11 +366,11 @@ public class Compiler {
   // SimExpr ::= [Unary] Term { AddOp Term }
   private SimExpr simExpr() {
     SimExpr simExpr = new SimExpr();
-    if (token == '+' || token == '-' || token == '!'){
+    if (lexer.token == Symbol.PLUS || lexer.token == Symbol.MINUS || lexer.token == Symbol.NOT){
       simExpr.setUnary(unary());
     }
     simExpr.setLeftTerm(term());
-    while (token == '+' || token == '-'){
+    while (lexer.token == Symbol.PLUS || lexer.token == Symbol.MINUS){
       simExpr.addAddOp(addOp());
       simExpr.addRightTerm(term());
     }
@@ -347,7 +382,8 @@ public class Compiler {
   private Term term() {
     Term term = new Term();
     term.setLeftFactor(factor());
-    while (token == '*' || token == '/' || token == '%'){
+    while (lexer.token == Symbol.MULT || lexer.token == Symbol.DIV
+            || lexer.token == Symbol.MOD || lexer.token == Symbol.AND){
       term.addMulOp(mulOp());
       term.addRightFactor(factor());
     }
@@ -355,33 +391,40 @@ public class Compiler {
     return term;
   }
 
-  // Factor ::= LValue ':' Expr | LValue | '(' Expr ')'
-  //              | 'r' '(' ')' | 's' '(' ')' | 't' '(' ')'
+  // Factor ::= LValue ':=' Expr | LValue | Number | '(' Expr ')' | CharValue
+  //              | 'readInteger' '(' ')' | 'readDouble' '(' ')' | 'readChar' '(' ')'
   private Factor factor() {
     Factor factor = new Factor();
-    //  'r' '(' ')' | 's' '(' ')' | 't' '(' ')'
-    if (token == 'r' || token == 's' || token == 't'){
-      nextToken();
-      if (token == '(') {
-        nextToken();
-        if (token == ')') {
-          nextToken();
+
+    if (lexer.token == Symbol.READINTEGER || lexer.token == Symbol.READDOUBLE
+            || lexer.token == Symbol.READCHAR){
+
+      lexer.nextToken();
+      if (lexer.token == Symbol.LEFTPAR) {
+        lexer.nextToken();
+        if (lexer.token == Symbol.RIGHTPAR) {
+          lexer.nextToken();
         } else
-          error();
+          error.signal("Expected `)`");
       } else
-        error();
-    } else if (token == '(') { // '(' Expr ')'
-      nextToken();
+        error.signal("Expected `(`");
+    } else if (lexer.token == Symbol.LEFTPAR) { // '(' Expr ')'
+      lexer.nextToken();
       factor.setExpr(expr());
-      if (token == ')') {
-        nextToken();
+      if (lexer.token == Symbol.RIGHTPAR) {
+        lexer.nextToken();
       } else
-        error();
+        error.signal(null);
+    } else if (lexer.token == Symbol.DOUBLE || lexer.token == Symbol.INT) {
+      factor.setNumber(number());
     } else {
       factor.setLValue(lValue()); // LValue
-      if (token == ':') { // LValue ':' Expr
-        nextToken();
-        factor.setExpr(expr());
+      if (lexer.token == Symbol.ASSIGN) { // LValue ':=' Expr
+        lexer.nextToken();
+        if (lexer.token == Symbol.CHAR){
+          factor.setCharValue(charValue());
+        } else
+          factor.setExpr(expr());
       }
     }
 
@@ -391,157 +434,126 @@ public class Compiler {
   // LValue ::= Ident | Ident '[' Expr ']'
   private LValue lValue() {
     LValue lValue = new LValue(ident());
-    if (token == '[') {
-      nextToken();
-      lValue.setExpr(expr());
-      if (token == ']') {
-        nextToken();
+
+    // SEM - check if variable was declared
+    String name = lexer.getStringValue();
+    Variable v = (Variable) symbolTable.get(name);
+    if ( v == null )
+      error.signal("Variable " + name + " was not declared");
+
+    if (lexer.token == Symbol.LEFTBRACE) {
+      lexer.nextToken();
+
+      // SEM - check if int inside [] and assign type to expr
+      if (lexer.token != Symbol.INT)
+        error.signal("Invalid value for array dimension");
+      lValue.setExpr(expr().setType(StdType.intType));
+
+      if (lexer.token == Symbol.RIGHTBRACE) {
+        lexer.nextToken();
       } else
-        error();
+        error.signal(null);
     }
     return lValue;
   }
 
-
-  // Ident ::= Letter { Letter | Digit }
+  // Ident ::= Letter { '_' | Letter | Digit }
   private Ident ident() {
-    String id = "";
-
-    if (isLetter(token)){
-      id += token;
-      nextRawToken();
-    } else {
-      error();
+    if (lexer.token != Symbol.IDENT) {
+      error.signal("Identifier expected here. Instead, got: " + lexer.token);
     }
-    if (token == ' ')
-      nextToken();
-
-    while(isLetter(token) || isDigit(token)){
-      id += token;
-      nextRawToken();
-    }
-
-		return new Ident(id);
+    String oldValue = lexer.getStringValue();
+    lexer.nextToken();
+    // check if it exists on the var hash table
+    return new Ident(oldValue);
   }
 
-  // RelOp ::= '=' | '#' | '<' | '>'
+  // Number ::= [ '+' | '-' ] IntNumber [ '.' IntNumber ]
+  private Number number() {
+    int multip = 1;
+    if (lexer.token == Symbol.MINUS) {
+      lexer.nextToken();
+      multip *= -1;
+    } else if (lexer.token == Symbol.PLUS){
+      lexer.nextToken();
+    }
+
+    if (lexer.token != Symbol.DOUBLE && lexer.token != Symbol.INT){
+      error.signal("Expected number type here");
+    }
+    double oldValue = lexer.getNumberValue();
+    lexer.nextToken();
+    return new Number(multip * oldValue);
+  }
+
+  // IntNumber ::= Digit { Digit }
+  private IntNumber intNumber() {
+    if (lexer.token != Symbol.INT){
+      error.signal("Expected integer type here");
+    }
+    return new IntNumber(lexer.getNumberValue());
+  }
+
+  // CharValue ::= '\'' Letter '\''
+  private CharValue charValue() {
+    if (lexer.token == Symbol.CHAR){
+      lexer.nextToken();
+    }
+
+    return new CharValue(lexer.getCharValue());
+  }
+
+  // RelOp ::= '=' | '!=' | '<' | '<=' | '>' | '>='
   private RelOp relOp() {
     RelOp relOp = null;
-    if (token == '=' || token == '#' || token == '<' || token == '>'){
-      relOp = new RelOp(token);
-      nextToken();
+    if (lexer.token == Symbol.LT || lexer.token == Symbol.LE ||
+            lexer.token == Symbol.GT || lexer.token == Symbol.GE ||
+            lexer.token == Symbol.NEQ || lexer.token == Symbol.EQ){
+      relOp = new RelOp(lexer.getStringValue());
+      lexer.nextToken();
     } else
-      error();
+      error.signal(null);
     return relOp;
   }
 
-  // AddOp ::= '+' | '-'
+  // AddOp ::= '+' | '-' | '||'
   private AddOp addOp() {
     AddOp addOp = null;
-    if (token == '+' || token == '-'){
-      addOp = new AddOp(token);
-      nextToken();
+    if (lexer.token == Symbol.PLUS || lexer.token == Symbol.MINUS || lexer.token == Symbol.OR){
+      addOp = new AddOp(lexer.getStringValue());
+      lexer.nextToken();
     } else
-      error();
+      error.signal(null);
     return addOp;
   }
 
-  // MulOp ::= '*' | '/' | '%'
+  // MulOp ::= '*' | '/' | '%' | '&&'
   private MulOp mulOp() {
     MulOp mulOp = null;
-    if (token == '*' || token == '/' || token == '%'){
-      mulOp = new MulOp(token);
-      nextToken();
+    if (lexer.token == Symbol.MULT || lexer.token == Symbol.DIV
+            || lexer.token == Symbol.MOD || lexer.token == Symbol.AND){
+      mulOp = new MulOp(lexer.getStringValue());
+      lexer.nextToken();
     } else
-      error();
+      error.signal(null);
     return mulOp;
   }
 
   // Unary ::= '+' | '-' | '!'
   private Unary unary() {
     Unary un = null;
-    if (token == '+' || token == '-' || token == '!'){
-      un = new Unary(token);
-      nextToken();
+    if (lexer.token == Symbol.PLUS || lexer.token == Symbol.MINUS || lexer.token == Symbol.NOT){
+      un = new Unary(lexer.getStringValue());
+      lexer.nextToken();
     } else
-      error();
+      error.signal(null);
     return un;
   }
 
   // Digit ::= '0' | '1' | ... | '9'
-  private Digit digit() {
-    Digit num = null;
-    if (isDigit(token)) {
-      num = new Digit(token);
-      nextToken();
-    } else
-      error();
-    return num;
-  }
+  // LEXER
 
   // Letter ::= 'A' | 'B' | ... | 'Z' | 'a' | 'b' | ... | 'z'
-  private char letter(){
-    char let = ' ';
-    if (isLetter(token)) {
-      let = token;
-      nextToken();
-    } else {
-      error();
-    }
-    return let;
-  }
-
-  // END OF GRAMMAR ============================================
-  private boolean isDigit(char c) {
-    if (c >= '0' && c <= '9')
-      return true;
-    else
-      return false;
-  }
-
-  private boolean isLetter(char c) {
-    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-      return true;
-    else
-      return false;
-  }
-
-  private void nextToken() {
-    while(tokenPos < input.length && input[tokenPos] == ' ')
-      tokenPos++;
-
-    if(tokenPos >= input.length)
-      token = '\0';
-    else {
-      token = input[tokenPos];
-      tokenPos++;
-    }
-    System.out.print(token);
-  }
-
-  private void nextRawToken() {
-    if (tokenPos < input.length) {
-  		token = input[tokenPos];
-      tokenPos++;
-      System.out.print(token);
-  	}
-  }
-
-  private void error() {
-    if ( tokenPos == 0 )
-      tokenPos = 1;
-    else
-      if ( tokenPos >= input.length )
-        tokenPos = input.length;
-
-    String strInput = new String( input, tokenPos - 1, input.length - tokenPos + 1 );
-    String strError = "Error at \"" + strInput + "\"";
-    System.out.println( strError );
-    throw new RuntimeException(strError);
-  }
-
-  private char token;
-  private int  tokenPos;
-  private char []input;
+  // LEXER
 
 }

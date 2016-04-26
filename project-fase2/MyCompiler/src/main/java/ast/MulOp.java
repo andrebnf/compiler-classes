@@ -1,15 +1,15 @@
-/**
-* 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
-* @author  André Bonfatti, 408182
-* @author  Thales Chagas,  408557
-*/
-
 package main.java.ast;
 
-public class MulOp {
-  private char c;
+/**
+ * 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
+ * @author  André Bonfatti, 408182
+ * @author  Thales Chagas,  408557
+ */
 
-  public MulOp(char c) {
+public class MulOp {
+  private String c;
+
+  public MulOp(String c) {
     this.c = c;
   }
 }
