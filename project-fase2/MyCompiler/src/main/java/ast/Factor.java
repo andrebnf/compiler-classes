@@ -18,6 +18,10 @@ public class Factor {
     this.type = type;
   }
 
+  public Type getType() {
+    return type;
+  }
+
   public String getTypeName() {
     return type.getName();
   }

@@ -353,13 +353,21 @@ public class Compiler {
   // Expr ::= SimExpr [ RelOp Expr]
   private Expr expr() {
     Expr expr = new Expr();
-    expr.setSimExpr(simExpr());
+    Expr rightExpr = null;
+    SimExpr simExpr = simExpr();
+    expr.setSimExpr(simExpr);
+    expr.setType(simExpr.getType());
     if (lexer.token == Symbol.LT || lexer.token == Symbol.LE ||
             lexer.token == Symbol.GT || lexer.token == Symbol.GE ||
             lexer.token == Symbol.NEQ || lexer.token == Symbol.EQ) {
       expr.setRelOp(relOp());
-      expr.setExpr(expr());
+      rightExpr = expr();
+      expr.setExpr(rightExpr);
     }
+
+    // SEM - Incompatible types
+    if (expr.getType() != rightExpr.getType())
+      error.signal("expr: Incompatible types");
 
     return expr;
   }
@@ -376,17 +384,29 @@ public class Compiler {
       simExpr.addRightTerm(term());
     }
 
+    // SEM - Incompatible types
+    // evaluate types set simExpr type and check term types
+    if (!simExpr.evaluateTypes()) {
+      error.signal("simExpr: Incompatible types");
+    }
     return simExpr;
   }
 
   // Term ::= Factor { MulOp Factor }
   private Term term() {
     Term term = new Term();
-    term.setLeftFactor(factor());
+    Factor leftFactor = factor();
+    term.setLeftFactor(leftFactor);
     while (lexer.token == Symbol.MULT || lexer.token == Symbol.DIV
             || lexer.token == Symbol.MOD || lexer.token == Symbol.AND){
       term.addMulOp(mulOp());
       term.addRightFactor(factor());
+    }
+
+    // SEM - Incompatible types
+    // evaluate types set term type and check factors types
+    if (!term.evaluateTypes()){
+      error.signal("term: Incompatible types");
     }
 
     return term;
@@ -400,6 +420,13 @@ public class Compiler {
     if (lexer.token == Symbol.READINTEGER || lexer.token == Symbol.READDOUBLE
             || lexer.token == Symbol.READCHAR){
 
+      if (lexer.token == Symbol.READINTEGER)
+        factor.setType(StdType.intType);
+      else if (lexer.token == Symbol.READDOUBLE)
+        factor.setType(StdType.doubleType);
+      else // if (lexer.token == Symbol.READCHAR)
+        factor.setType(StdType.charType);
+
       lexer.nextToken();
       if (lexer.token == Symbol.LEFTPAR) {
         lexer.nextToken();
@@ -411,7 +438,10 @@ public class Compiler {
         error.signal("Expected `(`");
     } else if (lexer.token == Symbol.LEFTPAR) { // '(' Expr ')'
       lexer.nextToken();
-      factor.setExpr(expr());
+      Expr expr = expr();
+      factor.setExpr(expr);
+      // SEM
+      factor.setType(expr.getType());
       if (lexer.token == Symbol.RIGHTPAR) {
         lexer.nextToken();
       } else
@@ -420,14 +450,24 @@ public class Compiler {
       factor.setNumber(number());
     } else {
       LValue l = lValue();
+      Type rType = null;
       factor.setLValue(l); // LValue
       if (lexer.token == Symbol.ASSIGN) { // LValue ':=' Expr
         lexer.nextToken();
-        if (lexer.token == Symbol.CHAR){
+        if (lexer.token == Symbol.CHAR) {
           factor.setCharValue(charValue());
-        } else
-          factor.setExpr(expr());
+          rType = StdType.charType;
+        } else {
+          Expr expr = expr();
+          factor.setExpr(expr);
+          rType = expr.getType();
+        }
+
+        // SEM - Incompatible types
         // check if lValue type is the same as expr
+        if (l.getType() != rType) {
+          error.signal("factor: Incompatible types");
+        }
       } else {
         factor.setType(l.getType()); // if only lValue, factor type is lValue's
       }

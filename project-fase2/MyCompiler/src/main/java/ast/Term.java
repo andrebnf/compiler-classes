@@ -11,6 +11,7 @@ public class Term {
   private Factor leftFactor;
   private ArrayList<MulOp> mulOpsList;
   private ArrayList<Factor> rightFactorsList;
+  private Type type;
 
   public void setLeftFactor(Factor leftFactor) {
     this.leftFactor = leftFactor;
@@ -22,6 +23,23 @@ public class Term {
 
   public void addMulOp(MulOp mulOp){
     mulOpsList.add(mulOp);
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public boolean evaluateTypes(){
+    setType(leftFactor.getType());
+    for (Factor f : rightFactorsList) {
+      if (f.getType() != getType())
+        return false;
+    }
+    return true;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
   }
 
   public Term() {

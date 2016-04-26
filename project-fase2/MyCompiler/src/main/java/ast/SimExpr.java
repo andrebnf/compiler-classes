@@ -12,6 +12,7 @@ public class SimExpr {
   private Term leftTerm;
   private ArrayList<AddOp> addOpsList;
   private ArrayList<Term> rightTermsList;
+  private Type type;
 
   public void setLeftTerm(Term leftTerm) {
     this.leftTerm = leftTerm;
@@ -32,5 +33,22 @@ public class SimExpr {
   public SimExpr(){
     rightTermsList = new ArrayList<Term>();
     addOpsList = new ArrayList<AddOp>();
+  }
+
+  public boolean evaluateTypes() {
+    setType(leftTerm.getType());
+    for (Term t : rightTermsList) {
+      if (t.getType() != getType())
+        return false;
+    }
+    return true;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
   }
 }

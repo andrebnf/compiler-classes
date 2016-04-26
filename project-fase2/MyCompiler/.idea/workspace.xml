@@ -2,46 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6d844d3b-cf05-4866-bd75-683d1d194bde" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/AddOp.java" afterPath="$PROJECT_DIR$/src/main/java/ast/AddOp.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/ArrayType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/ArrayType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/BreakStmt.java" afterPath="$PROJECT_DIR$/src/main/java/ast/BreakStmt.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/CharArrayType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/CharArrayType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/CharType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/CharType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/CharValue.java" afterPath="$PROJECT_DIR$/src/main/java/ast/CharValue.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Decl.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Decl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Digit.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Digit.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/DoubleArrayType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/DoubleArrayType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/DoubleType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/DoubleType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Expr.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Expr.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Factor.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Factor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Ident.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Ident.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/IfStmt.java" afterPath="$PROJECT_DIR$/src/main/java/ast/IfStmt.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/IntArrayType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/IntArrayType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/IntNumber.java" afterPath="$PROJECT_DIR$/src/main/java/ast/IntNumber.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/IntType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/IntType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/LValue.java" afterPath="$PROJECT_DIR$/src/main/java/ast/LValue.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Letter.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Letter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/MulOp.java" afterPath="$PROJECT_DIR$/src/main/java/ast/MulOp.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Number.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Number.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/PrintStmt.java" afterPath="$PROJECT_DIR$/src/main/java/ast/PrintStmt.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Program.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Program.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/RelOp.java" afterPath="$PROJECT_DIR$/src/main/java/ast/RelOp.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/SimExpr.java" afterPath="$PROJECT_DIR$/src/main/java/ast/SimExpr.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/StdType.java" afterPath="$PROJECT_DIR$/src/main/java/ast/StdType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Stmt.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Stmt.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/StmtBlock.java" afterPath="$PROJECT_DIR$/src/main/java/ast/StmtBlock.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Term.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Term.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Type.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Type.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Unary.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Unary.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/Variable.java" afterPath="$PROJECT_DIR$/src/main/java/ast/Variable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/VariableDecl.java" afterPath="$PROJECT_DIR$/src/main/java/ast/VariableDecl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ast/WhileStmt.java" afterPath="$PROJECT_DIR$/src/main/java/ast/WhileStmt.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/compiler/Compiler.java" afterPath="$PROJECT_DIR$/src/main/java/compiler/Compiler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/compiler/CompilerError.java" afterPath="$PROJECT_DIR$/src/main/java/compiler/CompilerError.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/executable/Main.java" afterPath="$PROJECT_DIR$/src/main/java/executable/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/lexer/Lexer.java" afterPath="$PROJECT_DIR$/src/main/java/lexer/Lexer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/lexer/Symbol.java" afterPath="$PROJECT_DIR$/src/main/java/lexer/Symbol.java" />
     </list>
     <ignored path="MyCompiler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -71,10 +35,40 @@
       <file leaf-file-name="Compiler.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/compiler/Compiler.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="521">
-              <caret line="429" column="51" selection-start-line="429" selection-start-column="51" selection-end-line="429" selection-end-column="51" />
+            <state relative-caret-position="315">
+              <caret line="426" column="17" selection-start-line="426" selection-start-column="17" selection-end-line="426" selection-end-column="17" />
               <folding>
                 <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SimExpr.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/ast/SimExpr.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="549">
+              <caret line="43" column="16" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+              <folding>
+                <element signature="e#992#993#0" expanded="true" />
+                <element signature="e#1013#1014#0" expanded="true" />
+                <element signature="e#1049#1050#0" expanded="true" />
+                <element signature="e#1075#1076#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Term.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/ast/Term.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="477">
+              <caret line="34" column="35" selection-start-line="34" selection-start-column="35" selection-end-line="34" selection-end-column="35" />
+              <folding>
+                <element signature="e#636#637#0" expanded="true" />
+                <element signature="e#657#658#0" expanded="true" />
+                <element signature="e#888#889#0" expanded="true" />
+                <element signature="e#914#915#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -98,15 +92,17 @@
       <file leaf-file-name="Factor.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/ast/Factor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="17" column="9" selection-start-line="17" selection-start-column="9" selection-end-line="17" selection-end-column="9" />
+            <state relative-caret-position="189">
+              <caret line="21" column="16" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
               <folding>
                 <element signature="e#356#357#0" expanded="true" />
                 <element signature="e#382#383#0" expanded="true" />
-                <element signature="e#415#416#0" expanded="true" />
-                <element signature="e#446#447#0" expanded="true" />
-                <element signature="e#554#555#0" expanded="true" />
-                <element signature="e#580#581#0" expanded="true" />
+                <element signature="e#409#410#0" expanded="true" />
+                <element signature="e#430#431#0" expanded="true" />
+                <element signature="e#463#464#0" expanded="true" />
+                <element signature="e#494#495#0" expanded="true" />
+                <element signature="e#602#603#0" expanded="true" />
+                <element signature="e#628#629#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -203,10 +199,8 @@
         <option value="$PROJECT_DIR$/src/main/java/ast/Letter.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/PrintStmt.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/Program.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ast/SimExpr.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/Stmt.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/StmtBlock.java" />
-        <option value="$PROJECT_DIR$/src/main/java/ast/Term.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/VariableDecl.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/WhileStmt.java" />
         <option value="$PROJECT_DIR$/src/main/java/compiler/Main.java" />
@@ -241,6 +235,8 @@
         <option value="$PROJECT_DIR$/src/main/java/ast/StdType.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/LValue.java" />
         <option value="$PROJECT_DIR$/src/main/java/ast/Factor.java" />
+        <option value="$PROJECT_DIR$/src/main/java/ast/SimExpr.java" />
+        <option value="$PROJECT_DIR$/src/main/java/ast/Term.java" />
         <option value="$PROJECT_DIR$/src/main/java/compiler/Compiler.java" />
       </list>
     </option>
@@ -331,6 +327,28 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MyCompiler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MyCompiler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="compiler" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -883,13 +901,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ast/Term.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="3" selection-start-line="7" selection-start-column="3" selection-end-line="7" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/ast/VariableDecl.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
@@ -1081,14 +1092,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ast/SimExpr.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="10" column="22" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/ast/Decl.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
@@ -1227,15 +1230,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/ast/Factor.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="17" column="9" selection-start-line="17" selection-start-column="9" selection-end-line="17" selection-end-column="9" />
+        <state relative-caret-position="189">
+          <caret line="21" column="16" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
           <folding>
             <element signature="e#356#357#0" expanded="true" />
             <element signature="e#382#383#0" expanded="true" />
-            <element signature="e#415#416#0" expanded="true" />
-            <element signature="e#446#447#0" expanded="true" />
-            <element signature="e#554#555#0" expanded="true" />
-            <element signature="e#580#581#0" expanded="true" />
+            <element signature="e#409#410#0" expanded="true" />
+            <element signature="e#430#431#0" expanded="true" />
+            <element signature="e#463#464#0" expanded="true" />
+            <element signature="e#494#495#0" expanded="true" />
+            <element signature="e#602#603#0" expanded="true" />
+            <element signature="e#628#629#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1253,10 +1258,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ast/Term.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="477">
+          <caret line="34" column="35" selection-start-line="34" selection-start-column="35" selection-end-line="34" selection-end-column="35" />
+          <folding>
+            <element signature="e#636#637#0" expanded="true" />
+            <element signature="e#657#658#0" expanded="true" />
+            <element signature="e#888#889#0" expanded="true" />
+            <element signature="e#914#915#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ast/SimExpr.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="549">
+          <caret line="43" column="16" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+          <folding>
+            <element signature="e#992#993#0" expanded="true" />
+            <element signature="e#1013#1014#0" expanded="true" />
+            <element signature="e#1049#1050#0" expanded="true" />
+            <element signature="e#1075#1076#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/compiler/Compiler.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="521">
-          <caret line="429" column="51" selection-start-line="429" selection-start-column="51" selection-end-line="429" selection-end-column="51" />
+        <state relative-caret-position="315">
+          <caret line="426" column="17" selection-start-line="426" selection-start-column="17" selection-end-line="426" selection-end-column="17" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
