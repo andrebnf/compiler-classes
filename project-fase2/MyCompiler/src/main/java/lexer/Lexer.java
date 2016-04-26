@@ -61,7 +61,6 @@ public class Lexer {
     keywordsTable.put("readInteger",  Symbol.READINTEGER);
     keywordsTable.put("int",          Symbol.INT);
     keywordsTable.put("double",       Symbol.DOUBLE);
-    keywordsTable.put("char",         Symbol.CHARID);
     keywordsTable.put("if",           Symbol.IF);
     keywordsTable.put("else",         Symbol.ELSE);
     keywordsTable.put("while",        Symbol.WHILE);
@@ -342,8 +341,6 @@ public class Lexer {
       System.out.print("readChar ");
     } else if (token == Symbol.INT) {
       System.out.print("int ");
-    } else if (token == Symbol.CHARID) {
-      System.out.print("char ");
     } else if (token == Symbol.DOUBLE) {
       System.out.print("double ");
     } else if (token == Symbol.IF) {

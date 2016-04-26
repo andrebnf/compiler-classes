@@ -420,6 +420,7 @@ public class Compiler {
     if (lexer.token == Symbol.READINTEGER || lexer.token == Symbol.READDOUBLE
             || lexer.token == Symbol.READCHAR){
 
+      // SEM
       if (lexer.token == Symbol.READINTEGER)
         factor.setType(StdType.intType);
       else if (lexer.token == Symbol.READDOUBLE)
@@ -440,13 +441,13 @@ public class Compiler {
       lexer.nextToken();
       Expr expr = expr();
       factor.setExpr(expr);
-      // SEM
-      factor.setType(expr.getType());
+      factor.setType(expr.getType()); // SEM
+
       if (lexer.token == Symbol.RIGHTPAR) {
         lexer.nextToken();
       } else
         error.signal("Expected `)`");
-    } else if (lexer.token == Symbol.DOUBLE || lexer.token == Symbol.INT) {
+    } else if (lexer.token == Symbol.DOUBLE || lexer.token == Symbol.INT) { // Number
       factor.setNumber(number());
     } else {
       LValue l = lValue();
