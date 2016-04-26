@@ -3,12 +3,12 @@ package main.java.ast;
 import main.java.lexer.Symbol;
 
 /**
- * 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
+ * 2016/01 Compiler - Federal University of São Carlos - Sorocaba Campus
  * @author  André Bonfatti, 408182
  * @author  Thales Chagas,  408557
  */
 
-public class ArrayType extends Type {
+public abstract class ArrayType extends Type {
 
   public static ArrayType doubleArrayType  = new DoubleArrayType();
   public static ArrayType intArrayType     = new IntArrayType();
@@ -26,14 +26,14 @@ public class ArrayType extends Type {
     super.setName(name);
   }
 
-  public ArrayType fromStdType(StdType stdType) {
+  public static ArrayType fromStdType(Type stdType) {
     ArrayType arr = null;
-    if (stdType.getName().equals(Symbol.INT)) {
+    if (stdType.getName().equals(Symbol.INT.toString())) {
       arr = ArrayType.intArrayType;
-    } else if (stdType.getName().equals(Symbol.DOUBLE)){
+    } else if (stdType.getName().equals(Symbol.DOUBLE.toString())){
       arr = ArrayType.doubleArrayType;
-    } else if (stdType.getName().equals(Symbol.CHAR)){
-      arr = ArrayType.doubleArrayType;
+    } else if (stdType.getName().equals(Symbol.CHAR.toString())){
+      arr = ArrayType.charArrayType;
     }
 
     return arr;

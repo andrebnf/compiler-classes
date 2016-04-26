@@ -10,7 +10,7 @@ import java.util.Hashtable;
 
 /**
 * UFSCar - Universidade Federal de São Carlos - Campus Sorocaba
-* 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
+* 2016/01 Compiler - Federal University of São Carlos - Sorocaba Campus
 * @author  André Bonfatti, 408182
 * @author  Thales Chagas,  408557
 
@@ -116,7 +116,7 @@ public class Compiler {
       error.signal("Expected a statement block");
 
     while(lexer.token == Symbol.INT || lexer.token == Symbol.DOUBLE
-            || lexer.token == Symbol.CHARID){ // { VariableDecl }
+            || lexer.token == Symbol.CHAR){ // { VariableDecl }
       stmtBlock.addVariableDecl(variableDecl());
     }
     while(lexer.token != Symbol.RIGHTCURLY) { // { Stmt }
@@ -159,12 +159,12 @@ public class Compiler {
   private Type type() {
     Type type = null;
     Symbol old_token = null;
-    if (lexer.token == Symbol.INT || lexer.token == Symbol.DOUBLE || lexer.token == Symbol.CHARID){
+    if (lexer.token == Symbol.INT || lexer.token == Symbol.DOUBLE || lexer.token == Symbol.CHAR){
       old_token = lexer.token;
       type = stdType();
       if (lexer.token == Symbol.LEFTBRACE) {
-        ArrayType arr = arrayType();
-        arr.setName(type.getName());
+        arrayType();
+        ArrayType arr = ArrayType.fromStdType(type);
         type = arr;
       }
     } else
@@ -182,7 +182,7 @@ public class Compiler {
     } else if (lexer.token == Symbol.DOUBLE) {
       stdType = StdType.doubleType;
       lexer.nextToken();
-    } else if (lexer.token == Symbol.CHARID) {
+    } else if (lexer.token == Symbol.CHAR) {
       stdType = StdType.charType;
       lexer.nextToken();
     } else
@@ -200,12 +200,13 @@ public class Compiler {
         if (lexer.token == Symbol.RIGHTBRACE) {
           lexer.nextToken();
         } else
-          error.signal(null);
-      }
+          error.signal("Expected `]`");
+      } else
+        error.signal("Expected `int` value here");
     } else
-      error.signal(null);
+      error.signal("Expected `[`");
 
-    return new ArrayType("temp");
+    return null;
   }
 
   // Stmt ::= Expr ';' | IfStmt | WhileStmt | BreakStmt | PrintStmt
@@ -258,20 +259,20 @@ public class Compiler {
                   if (lexer.token == Symbol.RIGHTCURLY)
                     lexer.nextToken();
                   else
-                    error.signal(null);
+                    error.signal("Expected `}`");
                 } else
-                  error.signal(null);
+                  error.signal("Expected `{`");
               }
             } else
-              error.signal(null);
+              error.signal("Expected `}`");
           } else
-            error.signal(null);
+            error.signal("Expected `{`");
         } else
-          error.signal(null);
+          error.signal("Expected `)`");
       } else
-        error.signal(null);
+        error.signal("Expected `(`");
     } else
-      error.signal(null);
+      error.signal("Expected `if` statement");
 
     return ifStmt;
   }
@@ -294,15 +295,15 @@ public class Compiler {
             if (lexer.token == Symbol.RIGHTCURLY)
               lexer.nextToken();
             else
-              error.signal(null);
+              error.signal("Expected `}`");
           } else
-            error.signal(null);
+            error.signal("Expected `{`");
         } else
-          error.signal(null);
+          error.signal("Expected `)`");
       } else
-        error.signal(null);
+        error.signal("Expected `(`");
     } else
-      error.signal(null);
+      error.signal("Expected `while` statement");
 
     return whileStmt;
   }
@@ -314,9 +315,9 @@ public class Compiler {
       if (lexer.token == Symbol.SEMICOLON) {
         lexer.nextToken();
       } else
-        error.signal(null);
+        error.signal("Expected `;`");
     } else
-      error.signal(null);
+      error.signal("Expected `break` statement");
 
     return new BreakStmt();
   }
@@ -338,13 +339,13 @@ public class Compiler {
           if (lexer.token == Symbol.SEMICOLON) {
             lexer.nextToken();
           } else
-            error.signal(null);
+            error.signal("Expected `;`");
         } else
-          error.signal(null);
+          error.signal("Expected `)`");
       } else
-        error.signal(null);
+        error.signal("Expected `(`");
     } else
-      error.signal(null);
+      error.signal("Expected `print` statement");
 
     return new PrintStmt();
   }
@@ -414,17 +415,21 @@ public class Compiler {
       if (lexer.token == Symbol.RIGHTPAR) {
         lexer.nextToken();
       } else
-        error.signal(null);
+        error.signal("Expected `)`");
     } else if (lexer.token == Symbol.DOUBLE || lexer.token == Symbol.INT) {
       factor.setNumber(number());
     } else {
-      factor.setLValue(lValue()); // LValue
+      LValue l = lValue();
+      factor.setLValue(l); // LValue
       if (lexer.token == Symbol.ASSIGN) { // LValue ':=' Expr
         lexer.nextToken();
         if (lexer.token == Symbol.CHAR){
           factor.setCharValue(charValue());
         } else
           factor.setExpr(expr());
+        // check if lValue type is the same as expr
+      } else {
+        factor.setType(l.getType()); // if only lValue, factor type is lValue's
       }
     }
 
@@ -434,6 +439,7 @@ public class Compiler {
   // LValue ::= Ident | Ident '[' Expr ']'
   private LValue lValue() {
     LValue lValue = new LValue(ident());
+    boolean isVector = false;
 
     // SEM - check if variable was declared
     String name = lexer.getStringValue();
@@ -443,6 +449,7 @@ public class Compiler {
 
     if (lexer.token == Symbol.LEFTBRACE) {
       lexer.nextToken();
+      isVector = true;
 
       // SEM - check if int inside [] and assign type to expr
       if (lexer.token != Symbol.INT)
@@ -452,8 +459,15 @@ public class Compiler {
       if (lexer.token == Symbol.RIGHTBRACE) {
         lexer.nextToken();
       } else
-        error.signal(null);
+        error.signal("Expected `}`");
     }
+
+    // setting a type to this lValue
+    Type t = StdType.fromVariable(v);
+    lValue.setType(t);
+    if (isVector)
+      lValue.setType(ArrayType.fromStdType(t));
+
     return lValue;
   }
 
@@ -512,7 +526,7 @@ public class Compiler {
       relOp = new RelOp(lexer.getStringValue());
       lexer.nextToken();
     } else
-      error.signal(null);
+      error.signal("Expected relational operator");
     return relOp;
   }
 
@@ -523,7 +537,7 @@ public class Compiler {
       addOp = new AddOp(lexer.getStringValue());
       lexer.nextToken();
     } else
-      error.signal(null);
+      error.signal("Expected addition operator");
     return addOp;
   }
 
@@ -535,7 +549,7 @@ public class Compiler {
       mulOp = new MulOp(lexer.getStringValue());
       lexer.nextToken();
     } else
-      error.signal(null);
+      error.signal("Expected mult operator");
     return mulOp;
   }
 
@@ -546,7 +560,7 @@ public class Compiler {
       un = new Unary(lexer.getStringValue());
       lexer.nextToken();
     } else
-      error.signal(null);
+      error.signal("Expected unary operator");
     return un;
   }
 

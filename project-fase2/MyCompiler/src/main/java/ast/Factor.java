@@ -1,7 +1,7 @@
 package main.java.ast;
 
 /**
- * 2016/01 Compiler - Federal University of São Calos - Sorocaba Campus
+ * 2016/01 Compiler - Federal University of São Carlos - Sorocaba Campus
  * @author  André Bonfatti, 408182
  * @author  Thales Chagas,  408557
  */
@@ -14,8 +14,12 @@ public class Factor {
 
   private Type type;
 
-  public void setType(Type t) {
-    type = t;
+  public void setType(Type type) {
+    this.type = type;
+  }
+
+  public String getTypeName() {
+    return type.getName();
   }
 
   public void setLValue(LValue lValue) {
