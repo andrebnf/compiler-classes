@@ -82,7 +82,7 @@ public class Lexer {
       token = Symbol.EOF;
     else if (input[tokenPos] == '/' && input[tokenPos + 1] == '/') { // line coment
       // comment found
-      while (input[tokenPos] != '\0'&& input[tokenPos] != '\n')
+      while (input[tokenPos] != '\0' && input[tokenPos] != '\n')
         tokenPos++;
       nextToken();
     }
@@ -142,11 +142,23 @@ public class Lexer {
         tokenPrinter();
       } else if (input[tokenPos] == '\''){
         token = Symbol.CHAR;
-        charValue = input[tokenPos + 1];
-        if (input[tokenPos + 2] != '\''){
-          error.signal("Char malformed");
+
+        if (input[tokenPos + 1] == '\\') {
+          if (input[tokenPos + 2] == 'n') {
+            charValue = '\n';
+          } else if (input[tokenPos + 2] == '0') {
+            charValue = '\0';
+          } else if (input[tokenPos + 2] == 't') {
+            charValue = '\t';
+          } else error.signal("Escaped char not recognized");
+          tokenPos += 4;
+        } else {
+          charValue = input[tokenPos + 1];
+          if (input[tokenPos + 2] != '\''){
+            error.signal("Char malformed");
+          }
+          tokenPos += 3;
         }
-        tokenPos += 3;
 
         tokenPrinter();
       } else {
@@ -275,6 +287,9 @@ public class Lexer {
   }
 
   private void tokenPrinter() {
+    boolean active = false;
+    if (!active) return;
+
     if (token == Symbol.IDENT) {
       System.out.print("Ident ");
     } else if (token == Symbol.NUMBER) {
