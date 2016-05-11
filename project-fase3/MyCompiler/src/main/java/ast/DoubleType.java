@@ -8,4 +8,8 @@ package main.java.ast;
 
 public class DoubleType extends StdType {
   public DoubleType() { super("double"); }
+
+  public void genC(PW pw){
+    pw.out.print("double ");
+  }
 }

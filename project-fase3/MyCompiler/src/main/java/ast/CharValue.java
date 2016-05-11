@@ -12,4 +12,8 @@ public class CharValue {
   public CharValue(char c){
     this.c = c;
   }
+
+  public void genC(PW pw){
+    pw.out.print(c);
+  }
 }

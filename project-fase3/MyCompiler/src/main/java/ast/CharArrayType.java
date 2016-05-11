@@ -10,4 +10,8 @@ public class CharArrayType extends ArrayType {
   public CharArrayType() {
     super("charArray");
   }
+
+  public void genC(PW pw){
+    pw.out.print("char ");
+  }
 }

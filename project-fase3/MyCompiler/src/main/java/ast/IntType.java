@@ -8,4 +8,8 @@ package main.java.ast;
 
 public class IntType extends StdType{
   public IntType() { super("int"); }
+
+  public void genC(PW pw){
+
+  }
 }

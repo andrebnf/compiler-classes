@@ -14,4 +14,8 @@ public class VariableDecl {
     this.variable = variable;
   }
 
+  public void genC(PW pw){
+    variable.genC(pw);
+    pw.out.println(";");
+  }
 }

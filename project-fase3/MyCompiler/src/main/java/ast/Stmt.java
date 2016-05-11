@@ -6,4 +6,7 @@ package main.java.ast;
  * @author  Thales Chagas,  408557
  */
 
-abstract public class Stmt {}
+abstract public class Stmt {
+
+  abstract public void genC(PW pw);
+}

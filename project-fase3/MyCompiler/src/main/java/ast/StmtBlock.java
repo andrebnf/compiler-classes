@@ -24,4 +24,13 @@ public class StmtBlock {
     variableDeclList = new ArrayList<VariableDecl>();
     stmtList = new ArrayList<Stmt>();
   }
+
+  public void genC(PW pw){
+    for (VariableDecl vd : variableDeclList) {
+      vd.genC(pw);
+    }
+    for (Stmt stmt : stmtList) {
+      stmt.genC(pw);
+    }
+  }
 }

@@ -34,4 +34,6 @@ abstract public class StdType extends Type {
 
     return arr;
   }
+
+  abstract public void genC(PW pw);
 }

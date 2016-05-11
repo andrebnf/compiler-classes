@@ -14,4 +14,7 @@ public class Program{
 		this.decl = decl;
 	}
 
+	public void genC(PW pw){
+		decl.genC(pw);
+	}
 }

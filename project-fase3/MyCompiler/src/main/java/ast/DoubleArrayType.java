@@ -10,4 +10,8 @@ public class DoubleArrayType extends ArrayType {
   public DoubleArrayType() {
     super("doubleArray");
   }
+
+  public void genC(PW pw){
+    pw.out.print("double ");
+  }
 }

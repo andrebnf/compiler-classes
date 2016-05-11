@@ -13,4 +13,12 @@ public class Decl {
   public Decl(StmtBlock stmtBlock) {
     this.stmtBlock = stmtBlock;
   }
+
+  public void genC(PW pw){
+    pw.out.println("void main (){");
+    pw.add();
+    stmtBlock.genC(pw);
+    pw.sub();
+    pw.out.print("}");
+  }
 }

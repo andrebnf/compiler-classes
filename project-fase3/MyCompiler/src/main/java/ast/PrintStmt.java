@@ -19,4 +19,13 @@ public class PrintStmt extends Stmt {
     exprList = new ArrayList<Expr>();
   }
 
+  public void genC(PW pw){
+    pw.out.print("printf(");
+    for (Expr expr : exprList) {
+      expr.genC(pw);
+      pw.out.print(", ");
+    }
+    pw.out.println(");");
+  }
+
 }

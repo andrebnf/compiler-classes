@@ -16,4 +16,8 @@ public class MulOp {
   public String getOp() {
     return op;
   }
+
+  public void genC(PW pw){
+    pw.out.print(op);
+  }
 }

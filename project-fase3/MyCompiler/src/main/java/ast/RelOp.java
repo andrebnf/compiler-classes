@@ -12,4 +12,8 @@ public class RelOp {
   public RelOp(String c) {
     this.c = c;
   }
+
+  public void genC(PW pw){
+    pw.out.print(c);
+  }
 }

@@ -63,4 +63,15 @@ public class SimExpr {
 
     return false;
   }
+
+  public void genC(PW pw){
+    if (unary != null) {
+      unary.genC(pw);
+    }
+    leftTerm.genC(pw);
+    for (int i = 0; i < addOpsList.size(); i++){
+      addOpsList.get(i).genC(pw);
+      rightTermsList.get(i).genC(pw);
+    }
+  }
 }

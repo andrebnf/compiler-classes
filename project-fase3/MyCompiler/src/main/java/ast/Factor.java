@@ -11,6 +11,7 @@ public class Factor {
   private Expr expr;
   private Number number;
   private CharValue charValue;
+  private ReadFunction readFunction;
 
   private Type type;
 
@@ -48,6 +49,31 @@ public class Factor {
     number = null;
     charValue = null;
     type = null;
+    readFunction = null;
   }
 
+  public void setReadFunction(ReadFunction readFunction) {
+    this.readFunction = readFunction;
+  }
+
+  public void genC(PW pw){
+    if (lValue != null) {
+      lValue.genC(pw);
+      if (expr != null) {
+        pw.out.print(" = ");
+        expr.genC(pw);
+        pw.out.println(";");
+      }
+    } else if (expr != null) {
+      expr.genC(pw);
+      pw.out.println(";");
+    } else if (readFunction != null) {
+      readFunction.genC(pw);
+      pw.out.println(";");
+    } else if (number != null) {
+      number.genC(pw);
+    } else {
+      charValue.genC(pw);
+    }
+  }
 }

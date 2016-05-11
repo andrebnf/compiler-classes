@@ -38,11 +38,11 @@ public class Expr extends Stmt{
     return type;
   }
 
-  public SimExpr hasOnlySimExpr (){
-    if (this == null) return null;
-    if (relOp == null && expr == null)
-      return simExpr;
-    else
-      return null;
+  public void genC(PW pw){
+    simExpr.genC(pw);
+    if (relOp != null) {
+      relOp.genC(pw);
+      expr.genC(pw);
+    }
   }
 }

@@ -1,5 +1,6 @@
 package main.java;
 
+import com.sun.xml.internal.ws.util.StringUtils;
 import main.java.ast.*;
 import main.java.ast.Number;
 import main.java.compiler.CompilerError;
@@ -37,11 +38,11 @@ Expr         ::= SimExpr [ RelOp Expr]
 SimExpr      ::= [Unary] Term { AddOp Term }
 Term         ::= Factor { MulOp Factor }
 Factor       ::= LValue ':=' Expr
-| LValue
-| '(' Expr ')'
-| 'readInteger' '(' ')' | 'readDouble' '(' ')' | 'readChar' '(' ')'
-| CharValue
-| Number
+                | LValue
+                | '(' Expr ')'
+                | 'readInteger' '(' ')' | 'readDouble' '(' ')' | 'readChar' '(' ')'
+                | CharValue
+                | Number
 LValue       ::= Ident | Ident '[' Expr ']'
 Ident        ::= Letter { Letter | Digit }
 Number       ::= [ '+' | '-' ] IntNumber [ '.' IntNumber ]
@@ -60,9 +61,13 @@ public class Compiler {
   private Lexer lexer;
   private CompilerError error;
   private int breakableCount;
+  private int lineExpressionsCount;
+  private String varIdentBuffer;
 
   public Program compile(char []input, PrintWriter outError) {
     breakableCount = 0;
+    lineExpressionsCount = 0;
+    varIdentBuffer = "";
 
     symbolTable = new Hashtable<String, Variable>();
     error = new CompilerError(outError);
@@ -212,17 +217,28 @@ public class Compiler {
   // Stmt ::= Expr ';' | IfStmt | WhileStmt | BreakStmt | PrintStmt
   private Stmt stmt() {
     Stmt stmt = null;
+    lineExpressionsCount = 0;
 
     if (lexer.token == Symbol.IF) {
       stmt = ifStmt();
+      lineExpressionsCount = 2;
     } else if (lexer.token == Symbol.WHILE) {
       stmt = whileStmt();
+      lineExpressionsCount = 2;
     } else if (lexer.token == Symbol.BREAK) {
       stmt = breakStmt();
+      lineExpressionsCount = 2;
     } else if (lexer.token == Symbol.PRINT) {
       stmt = printStmt();
+      lineExpressionsCount = 2;
     } else {
       stmt = expr();
+
+      // SEM - check if only one expression w/o assign or read funcions in a line
+      if (lineExpressionsCount == 1)
+        error.signal("Assign expected.");
+
+      lineExpressionsCount = 0;
       if (lexer.token == Symbol.SEMICOLON)
         lexer.nextToken();
       else
@@ -382,8 +398,6 @@ public class Compiler {
         error.signal("Unchainable operators");
     }
 
-    // TODO SEM - if only one expression is present on line
-
     return expr;
   }
 
@@ -439,15 +453,28 @@ public class Compiler {
 
     // 'readInteger' '(' ')' | 'readDouble' '(' ')' | 'readChar' '(' ')'
     if (lexer.token == Symbol.READINTEGER || lexer.token == Symbol.READDOUBLE
-            || lexer.token == Symbol.READCHAR){
+            || lexer.token == Symbol.READCHAR) {
 
-      // SEM
-      if (lexer.token == Symbol.READINTEGER)
+      // SEM - incrementing lineExpressionsCount: checked afterwards to analise if
+      //       only one expression is present on line
+      lineExpressionsCount++;
+
+      // SEM - read function is beign assigned
+      if (varIdentBuffer.isEmpty())
+        error.signal("Could'nt find variable to be assigned with read function.");
+
+      // SEM - set types and set readFunction context
+      if (lexer.token == Symbol.READINTEGER){
         factor.setType(StdType.intType);
-      else if (lexer.token == Symbol.READDOUBLE)
+        factor.setReadFunction(ReadFunction.setReadInt(varIdentBuffer));
+      } else if (lexer.token == Symbol.READDOUBLE){
         factor.setType(StdType.doubleType);
-      else // if (lexer.token == Symbol.READCHAR)
+        factor.setReadFunction(ReadFunction.setReadDouble(varIdentBuffer));
+      } else { // if (lexer.token == Symbol.READCHAR)
         factor.setType(StdType.charType);
+        factor.setReadFunction(ReadFunction.setReadChar(varIdentBuffer));
+      }
+      varIdentBuffer = "";
 
       lexer.nextToken();
       if (lexer.token == Symbol.LEFTPAR) {
@@ -462,6 +489,11 @@ public class Compiler {
 
     // '(' Expr ')'
     else if (lexer.token == Symbol.LEFTPAR) {
+
+      // SEM - incrementing lineExpressionsCount: checked afterwards to analise if
+      //       only one expression is present on line
+      lineExpressionsCount++;
+
       lexer.nextToken();
       Expr expr = expr();
       factor.setExpr(expr);
@@ -475,6 +507,7 @@ public class Compiler {
 
     // Number
     else if (lexer.token == Symbol.DOUBLE || lexer.token == Symbol.INT) {
+
       if (lexer.token == Symbol.DOUBLE) {
         factor.setType(StdType.doubleType);
       }
@@ -487,12 +520,15 @@ public class Compiler {
 
     // CharValue
     else if (lexer.token == Symbol.CHAR) {
+
       factor.setCharValue(charValue());
       factor.setType(StdType.charType);
     }
 
     // LValue | LValue ':=' Expr
     else {
+      varIdentBuffer = "";
+
       // LValue
       LValue l = lValue();
       Type rType = null;
@@ -500,6 +536,11 @@ public class Compiler {
 
       // LValue ':=' Expr
       if (lexer.token == Symbol.ASSIGN) {
+
+        // SEM - incrementing lineExpressionsCount: checked afterwards to analise if
+        //       only one expression is present on line
+        lineExpressionsCount += 2;
+
         lexer.nextToken();
         Expr expr = expr();
         factor.setExpr(expr);
@@ -528,6 +569,8 @@ public class Compiler {
     Variable v = symbolTable.get(name);
     if (v == null)
       error.signal("Variable " + name + " was not declared");
+
+    varIdentBuffer = name;
 
     if (lexer.token == Symbol.LEFTBRACE) {
       lexer.nextToken();

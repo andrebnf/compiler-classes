@@ -13,4 +13,8 @@ public class Number {
   public Number(double n) {
     number = n;
   }
+
+  public void genC(PW pw){
+    pw.out.print(number);
+  }
 }

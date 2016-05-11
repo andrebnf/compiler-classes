@@ -10,4 +10,8 @@ public class CharType extends StdType {
   public CharType() {
     super("char");
   }
+
+  public void genC(PW pw){
+    pw.out.print("char ");
+  }
 }

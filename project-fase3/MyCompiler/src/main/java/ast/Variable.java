@@ -27,4 +27,8 @@ public class Variable {
     return type.getName();
   }
 
+  public void genC(PW pw){
+    type.genC(pw);
+    ident.genC(pw);
+  }
 }

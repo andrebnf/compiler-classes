@@ -18,6 +18,7 @@ public class LValue {
 
   public LValue(Ident ident) {
     this.ident = ident;
+    expr = null;
   }
 
   public void setType(Type type) {
@@ -26,5 +27,14 @@ public class LValue {
 
   public Type getType() {
     return type;
+  }
+
+  public void genC(PW pw){
+    ident.genC(pw);
+    if (expr != null) {
+      pw.out.print("[");
+      expr.genC(pw);
+      pw.out.println("];");
+    }
   }
 }

@@ -6,4 +6,8 @@ package main.java.ast;
  * @author  Thales Chagas,  408557
  */
 
-public class BreakStmt extends Stmt {}
+public class BreakStmt extends Stmt {
+  public void genC(PW pw){
+    pw.out.print("break;");
+  }
+}

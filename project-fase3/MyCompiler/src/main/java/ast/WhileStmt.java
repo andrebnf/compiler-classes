@@ -23,4 +23,16 @@ public class WhileStmt extends Stmt {
   public WhileStmt() {
     stmtList = new ArrayList<Stmt>();
   }
+
+  public void genC(PW pw){
+    pw.out.print("while (");
+    expr.genC(pw);
+    pw.out.print(") {");
+    pw.add();
+    for (Stmt stmt : stmtList){
+      stmt.genC(pw);
+    }
+    pw.sub();
+    pw.out.print("}");
+  }
 }

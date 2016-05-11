@@ -54,4 +54,12 @@ public class Term {
 
     return false;
   }
+
+  public void genC(PW pw){
+    leftFactor.genC(pw);
+    for (int i = 0; i < mulOpsList.size(); i++) {
+      mulOpsList.get(i).genC(pw);
+      rightFactorsList.get(i).genC(pw);
+    }
+  }
 }

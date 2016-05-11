@@ -28,4 +28,6 @@ abstract public class Type {
   public Type(String name) {
     this.name = name;
   }
+
+  abstract public void genC(PW pw);
 }

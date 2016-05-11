@@ -13,4 +13,8 @@ public class Ident {
   public Ident(String id){
     this.id = id;
   }
+
+  public void genC(PW pw){
+    pw.out.print(id);
+  }
 }

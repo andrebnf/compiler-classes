@@ -10,4 +10,8 @@ public class IntArrayType extends ArrayType {
   public IntArrayType() {
     super("intArray");
   }
+
+  public void genC(PW pw){
+
+  }
 }

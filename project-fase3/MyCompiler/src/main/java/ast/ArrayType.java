@@ -38,4 +38,6 @@ public abstract class ArrayType extends Type {
 
     return arr;
   }
+
+  abstract public void genC(PW pw);
 }

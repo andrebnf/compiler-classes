@@ -16,4 +16,8 @@ public class Unary {
   public Unary(String c) {
     this.c = c.toCharArray()[0];
   }
+
+  public void genC(PW pw){
+    pw.out.print(c);
+  }
 }

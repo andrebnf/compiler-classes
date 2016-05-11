@@ -12,4 +12,8 @@ public class Digit {
   public Digit(char c) {
     this.c = c;
   }
+
+  public void genC(PW pw){
+    pw.out.print(c);
+  }
 }

@@ -30,4 +30,30 @@ public class IfStmt extends Stmt {
     stmtTopList = new ArrayList<Stmt>();
     stmtBottomList = new ArrayList<Stmt>();
   }
+
+  public void genC(PW pw){
+    pw.out.print("if (");
+    expr.genC(pw);
+    pw.out.print(") {");
+    pw.add();
+
+    for (Stmt stmt : stmtTopList)
+      stmt.genC(pw);
+
+    pw.sub();
+    pw.out.print("} ");
+
+    if (stmtBottomList.size() > 0) {
+      pw.out.print("else {");
+      pw.add();
+
+      for (Stmt stmt : stmtBottomList)
+        stmt.genC(pw);
+
+
+      pw.sub();
+      pw.out.print("} ");
+    }
+    pw.out.println();
+  }
 }
